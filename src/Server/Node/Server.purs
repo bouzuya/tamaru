@@ -1,5 +1,6 @@
 module Server.Node.Server
   ( Body
+  , HTTP
   , Header
   , Response
   , StatusCode(..)
@@ -10,11 +11,11 @@ import Control.Monad.Eff (Eff)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Node.Encoding as Encoding
-import Node.HTTP (HTTP)
 import Node.HTTP as HTTP
 import Node.Stream as Stream
 import Prelude (Unit, bind, pure, unit, ($))
 
+type HTTP = HTTP.HTTP
 type Body = String
 type Header = Tuple String String
 newtype StatusCode = StatusCode Int
@@ -56,9 +57,9 @@ handleRequest f request response = do
 
 run
   :: forall e
-  . Eff (http :: HTTP | e) Unit
-  -> Eff (http :: HTTP | e) Response
-  -> Eff (http :: HTTP | e) Unit
+  . Eff (http :: HTTP.HTTP | e) Unit
+  -> Eff (http :: HTTP.HTTP | e) Response
+  -> Eff (http :: HTTP.HTTP | e) Unit
 run f g = do
   server <- HTTP.createServer (handleRequest g)
   let

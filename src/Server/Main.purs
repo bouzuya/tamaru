@@ -3,9 +3,8 @@ module Server.Main (main) where
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Data.Tuple (Tuple(..))
-import Node.HTTP (HTTP)
 import Prelude (Unit, pure)
-import Server.Node.Server (StatusCode(..), run)
+import Server.Node.Server (HTTP, StatusCode(..), run)
 
 main :: forall e. Eff (console :: CONSOLE, http :: HTTP | e) Unit
 main = do
