@@ -11,7 +11,7 @@ handleRequest
 handleRequest { headers, method, url } = do
   pure
     { body: "method: " <> method <> ", url: " <> url
-    , header: (Tuple "Content-Type" "text/plain")
+    , headers: [(Tuple "Content-Type" "text/plain"), (Tuple "X-Foo" "bar")]
     , status: (StatusCode 200)
     }
 

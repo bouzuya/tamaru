@@ -9,6 +9,7 @@ module Server.Node.Server
   ) where
 
 import Control.Monad.Eff (Eff)
+import Data.Foldable as Array
 import Data.Maybe (Maybe(..))
 import Data.StrMap as StrMap
 import Data.Tuple (Tuple(..))
@@ -27,7 +28,7 @@ type Request =
   , url :: String }
 type Response =
   { body :: Body
-  , header :: Header
+  , headers :: Array Header
   , status :: StatusCode
   }
 
@@ -42,6 +43,11 @@ setHeader
   :: forall e. HTTP.Response -> Header -> Eff (http :: HTTP | e) Unit
 setHeader response (Tuple name value) =
   HTTP.setHeader response name value
+
+setHeaders
+  :: forall e. HTTP.Response -> Array Header -> Eff (http :: HTTP | e) Unit
+setHeaders response headers =
+  Array.for_ headers (setHeader response)
 
 setStatusCode
   :: forall e. HTTP.Response -> StatusCode -> Eff (http :: HTTP | e) Unit
@@ -63,9 +69,9 @@ readRequest request = do
 
 writeResponse
   :: forall e. HTTP.Response -> Response -> Eff (http :: HTTP | e) Unit
-writeResponse response { body, header, status } = do
+writeResponse response { body, headers, status } = do
   _ <- setStatusCode response status
-  _ <- setHeader response header
+  _ <- setHeaders response headers
   setBody response body
 
 handleRequest
