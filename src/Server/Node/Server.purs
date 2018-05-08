@@ -84,9 +84,9 @@ handleRequest
   -> HTTP.Request
   -> HTTP.Response
   -> Eff (http :: HTTP | e) Unit
-handleRequest f request response = do
+handleRequest onRequest request response = do
   req <- readRequest request
-  res <- f req
+  res <- onRequest req
   writeResponse response res
 
 run
@@ -95,12 +95,12 @@ run
   -> Eff (http :: HTTP.HTTP | e) Unit
   -> (Request -> Eff (http :: HTTP.HTTP | e) Response)
   -> Eff (http :: HTTP.HTTP | e) Unit
-run { hostname, port } f g = do
-  server <- HTTP.createServer (handleRequest g)
+run { hostname, port } onListen onRequest = do
+  server <- HTTP.createServer (handleRequest onRequest)
   let
     listenOptions =
       { hostname
       , port
       , backlog: Nothing
       }
-  HTTP.listen server listenOptions f
+  HTTP.listen server listenOptions onListen
