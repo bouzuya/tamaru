@@ -1,5 +1,8 @@
 module Server.Node.Server
-  ( module HTTP
+  ( Body
+  , Header
+  , Response
+  , StatusCode(..)
   , run
   ) where
 
@@ -43,21 +46,21 @@ writeResponse response { body, header, status } = do
 
 handleRequest
   :: forall e
-  . HTTP.Request
+  . Eff (http :: HTTP | e) Response
+  -> HTTP.Request
   -> HTTP.Response
   -> Eff (http :: HTTP | e) Unit
-handleRequest _request response = do
-  let
-    myResponse =
-      { body: "OK"
-      , header: (Tuple "Content-Type" "text/plain")
-      , status: (StatusCode 200)
-      }
+handleRequest f request response = do
+  myResponse <- f
   writeResponse response myResponse
 
-run :: forall e. Eff (http :: HTTP | e) Unit -> Eff (http :: HTTP | e) Unit
-run f = do
-  server <- HTTP.createServer handleRequest
+run
+  :: forall e
+  . Eff (http :: HTTP | e) Unit
+  -> Eff (http :: HTTP | e) Response
+  -> Eff (http :: HTTP | e) Unit
+run f g = do
+  server <- HTTP.createServer (handleRequest g)
   let
     listenOptions =
       { hostname: "0.0.0.0"
