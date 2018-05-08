@@ -2,6 +2,7 @@ module Server.Node.Server
   ( Body
   , HTTP
   , Header
+  , Request
   , Response
   , StatusCode(..)
   , run
@@ -9,6 +10,7 @@ module Server.Node.Server
 
 import Control.Monad.Eff (Eff)
 import Data.Maybe (Maybe(..))
+import Data.StrMap as StrMap
 import Data.Tuple (Tuple(..))
 import Node.Encoding as Encoding
 import Node.HTTP as HTTP
@@ -19,7 +21,15 @@ type HTTP = HTTP.HTTP
 type Body = String
 type Header = Tuple String String
 newtype StatusCode = StatusCode Int
-type Response = { body :: Body, header :: Header, status :: StatusCode }
+type Request =
+  { headers :: Array Header
+  , method :: String
+  , url :: String }
+type Response =
+  { body :: Body
+  , header :: Header
+  , status :: StatusCode
+  }
 
 setBody
   :: forall e. HTTP.Response -> Body -> Eff (http :: HTTP | e) Unit
@@ -38,6 +48,19 @@ setStatusCode
 setStatusCode response (StatusCode code) =
   HTTP.setStatusCode response code
 
+readRequest
+  :: forall e. HTTP.Request -> Eff (http :: HTTP | e) Request
+readRequest request = do
+  let
+    url = HTTP.requestURL request
+    method = HTTP.requestMethod request
+    headers = HTTP.requestHeaders request
+  pure $
+    { headers: StrMap.foldMap (\k v -> [Tuple k v]) headers
+    , method
+    , url
+    }
+
 writeResponse
   :: forall e. HTTP.Response -> Response -> Eff (http :: HTTP | e) Unit
 writeResponse response { body, header, status } = do
@@ -47,18 +70,19 @@ writeResponse response { body, header, status } = do
 
 handleRequest
   :: forall e
-  . Eff (http :: HTTP | e) Response
+  . (Request -> Eff (http :: HTTP | e) Response)
   -> HTTP.Request
   -> HTTP.Response
   -> Eff (http :: HTTP | e) Unit
 handleRequest f request response = do
-  myResponse <- f
-  writeResponse response myResponse
+  req <- readRequest request
+  res <- f req
+  writeResponse response res
 
 run
   :: forall e
   . Eff (http :: HTTP.HTTP | e) Unit
-  -> Eff (http :: HTTP.HTTP | e) Response
+  -> (Request -> Eff (http :: HTTP.HTTP | e) Response)
   -> Eff (http :: HTTP.HTTP | e) Unit
 run f g = do
   server <- HTTP.createServer (handleRequest g)

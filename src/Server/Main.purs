@@ -3,15 +3,18 @@ module Server.Main (main) where
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Data.Tuple (Tuple(..))
-import Prelude (Unit, pure)
-import Server.Node.Server (HTTP, StatusCode(..), run)
+import Prelude (Unit, pure, (<>))
+import Server.Node.Server (HTTP, Request, Response, StatusCode(..), run)
+
+handleRequest
+  :: forall e. Request -> Eff (http :: HTTP | e) Response
+handleRequest { headers, method, url } = do
+  pure
+    { body: "method: " <> method <> ", url: " <> url
+    , header: (Tuple "Content-Type" "text/plain")
+    , status: (StatusCode 200)
+    }
 
 main :: forall e. Eff (console :: CONSOLE, http :: HTTP | e) Unit
 main = do
-  run (log "listening...") do
-    pure
-      { body: "OK"
-      , header: (Tuple "Content-Type" "text/plain")
-      , status: (StatusCode 200)
-      }
-
+  run (log "listening...") handleRequest
