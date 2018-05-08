@@ -17,4 +17,4 @@ handleRequest { headers, method, url } = do
 
 main :: forall e. Eff (console :: CONSOLE, http :: HTTP | e) Unit
 main = do
-  run (log "listening...") handleRequest
+  run { hostname: "0.0.0.0", port: 3000 } (log "listening...") handleRequest

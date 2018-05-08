@@ -31,6 +31,10 @@ type Response =
   , headers :: Array Header
   , status :: StatusCode
   }
+type ServerOptions =
+  { hostname :: String
+  , port :: Int
+  }
 
 setBody
   :: forall e. HTTP.Response -> Body -> Eff (http :: HTTP | e) Unit
@@ -87,15 +91,16 @@ handleRequest f request response = do
 
 run
   :: forall e
-  . Eff (http :: HTTP.HTTP | e) Unit
+  . ServerOptions
+  -> Eff (http :: HTTP.HTTP | e) Unit
   -> (Request -> Eff (http :: HTTP.HTTP | e) Response)
   -> Eff (http :: HTTP.HTTP | e) Unit
-run f g = do
+run { hostname, port } f g = do
   server <- HTTP.createServer (handleRequest g)
   let
     listenOptions =
-      { hostname: "0.0.0.0"
-      , port: 3000
+      { hostname
+      , port
       , backlog: Nothing
       }
   HTTP.listen server listenOptions f
