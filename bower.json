@@ -8,6 +8,7 @@
     "output"
   ],
   "dependencies": {
+    "purescript-aff": "^4.1.1",
     "purescript-console": "^3.0.0",
     "purescript-node-http": "^4.2.0",
     "purescript-prelude": "^3.3.0"

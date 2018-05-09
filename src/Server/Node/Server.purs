@@ -8,22 +8,30 @@ module Server.Node.Server
   , run
   ) where
 
+import Control.Monad.Aff (Aff, liftEff')
+import Control.Monad.Aff as Aff
+import Control.Monad.Aff.AVar (AVAR)
+import Control.Monad.Aff.AVar as AVar
 import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Class (liftEff)
 import Data.Foldable as Array
 import Data.Maybe (Maybe(..))
 import Data.StrMap as StrMap
 import Data.Tuple (Tuple(..))
+import Node.Buffer (BUFFER, Buffer)
+import Node.Buffer as Buffer
 import Node.Encoding as Encoding
 import Node.HTTP as HTTP
 import Node.Stream as Stream
-import Prelude (Unit, bind, pure, unit, ($))
+import Prelude (Unit, bind, pure, unit, ($), (<>))
 
 type HTTP = HTTP.HTTP
 type Body = String
 type Header = Tuple String String
 newtype StatusCode = StatusCode Int
 type Request =
-  { headers :: Array Header
+  { body :: Buffer
+  , headers :: Array Header
   , method :: String
   , url :: String }
 type Response =
@@ -58,15 +66,39 @@ setStatusCode
 setStatusCode response (StatusCode code) =
   HTTP.setStatusCode response code
 
+readBody
+  :: forall e
+  . HTTP.Request
+  -> Aff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Buffer
+readBody request = do
+  let readable = HTTP.requestAsStream request
+  bv <- AVar.makeEmptyVar
+  bsv <- AVar.makeVar []
+  -- TODO: check exception
+  _ <- liftEff' $ Stream.onData readable \b -> Aff.launchAff_ do
+    bs <- AVar.takeVar bsv
+    AVar.putVar (bs <> [b]) bsv
+  _ <- liftEff' $ Stream.onError readable \e -> Aff.launchAff_ do
+    AVar.killVar e bv
+  _ <- liftEff' $ Stream.onEnd readable $ Aff.launchAff_ do
+    bs <- AVar.takeVar bsv
+    b <- liftEff (Buffer.concat bs)
+    AVar.putVar b bv
+  AVar.takeVar bv
+
 readRequest
-  :: forall e. HTTP.Request -> Eff (http :: HTTP | e) Request
+  :: forall e
+  . HTTP.Request
+  -> Aff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Request
 readRequest request = do
   let
-    url = HTTP.requestURL request
-    method = HTTP.requestMethod request
     headers = HTTP.requestHeaders request
+    method = HTTP.requestMethod request
+    url = HTTP.requestURL request
+  body <- readBody request
   pure $
-    { headers: StrMap.foldMap (\k v -> [Tuple k v]) headers
+    { body
+    , headers: StrMap.foldMap (\k v -> [Tuple k v]) headers
     , method
     , url
     }
@@ -80,21 +112,21 @@ writeResponse response { body, headers, status } = do
 
 handleRequest
   :: forall e
-  . (Request -> Eff (http :: HTTP | e) Response)
+  . (Request -> Aff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Response)
   -> HTTP.Request
   -> HTTP.Response
-  -> Eff (http :: HTTP | e) Unit
-handleRequest onRequest request response = do
+  -> Eff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Unit
+handleRequest onRequest request response = Aff.launchAff_ do
   req <- readRequest request
   res <- onRequest req
-  writeResponse response res
+  liftEff $ writeResponse response res
 
 run
   :: forall e
   . ServerOptions
-  -> Eff (http :: HTTP.HTTP | e) Unit
-  -> (Request -> Eff (http :: HTTP.HTTP | e) Response)
-  -> Eff (http :: HTTP.HTTP | e) Unit
+  -> Eff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Unit
+  -> (Request -> Aff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Response)
+  -> Eff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Unit
 run { hostname, port } onListen onRequest = do
   server <- HTTP.createServer (handleRequest onRequest)
   let
