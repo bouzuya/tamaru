@@ -30,7 +30,7 @@ type Body = String
 type Header = Tuple String String
 newtype StatusCode = StatusCode Int
 type Request =
-  { body :: Buffer
+  { body :: String
   , headers :: Array Header
   , method :: String
   , url :: String }
@@ -69,7 +69,7 @@ setStatusCode response (StatusCode code) =
 readBody
   :: forall e
   . HTTP.Request
-  -> Aff (ServerEff e) Buffer
+  -> Aff (ServerEff e) String
 readBody request = do
   let readable = HTTP.requestAsStream request
   bv <- AVar.makeEmptyVar
@@ -84,7 +84,8 @@ readBody request = do
     bs <- AVar.takeVar bsv
     b <- liftEff (Buffer.concat bs)
     AVar.putVar b bv
-  AVar.takeVar bv
+  b <- AVar.takeVar bv
+  liftEff (Buffer.toString Encoding.UTF8 b)
 
 readRequest
   :: forall e

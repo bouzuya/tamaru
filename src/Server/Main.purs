@@ -2,13 +2,10 @@ module Server.Main (main) where
 
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Data.Foldable (intercalate)
 import Data.Tuple (Tuple(..))
-import Node.Buffer as Buffer
-import Node.Encoding as Encoding
-import Prelude (Unit, bind, pure, ($), (<>))
+import Prelude (Unit, pure, (<>))
 import Server.Node.Server (Request, Response, ServerEff, StatusCode(..), run)
 
 onRequest
@@ -16,13 +13,12 @@ onRequest
   . Request
   -> Aff (ServerEff e) Response
 onRequest { body, headers, method, url } = do
-  bodyAsString <- liftEff $ Buffer.toString Encoding.UTF8 body
   pure
     { body:
         intercalate ", "
           [ "method: " <> method
           , "url: " <> url
-          , "body: " <> bodyAsString
+          , "body: " <> body
           ]
     , headers: [(Tuple "Content-Type" "text/plain"), (Tuple "X-Foo" "bar")]
     , status: (StatusCode 200)
