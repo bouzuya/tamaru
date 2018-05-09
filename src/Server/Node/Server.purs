@@ -1,9 +1,9 @@
 module Server.Node.Server
   ( Body
-  , HTTP
   , Header
   , Request
   , Response
+  , ServerEff
   , StatusCode(..)
   , run
   ) where
@@ -25,7 +25,7 @@ import Node.HTTP as HTTP
 import Node.Stream as Stream
 import Prelude (Unit, bind, pure, unit, ($), (<>))
 
-type HTTP = HTTP.HTTP
+type ServerEff e = (avar :: AVAR, buffer :: BUFFER, http :: HTTP.HTTP | e)
 type Body = String
 type Header = Tuple String String
 newtype StatusCode = StatusCode Int
@@ -45,31 +45,31 @@ type ServerOptions =
   }
 
 setBody
-  :: forall e. HTTP.Response -> Body -> Eff (http :: HTTP | e) Unit
+  :: forall e. HTTP.Response -> Body -> Eff (http :: HTTP.HTTP | e) Unit
 setBody response body = do
   let writable = HTTP.responseAsStream response
   _ <- Stream.writeString writable Encoding.UTF8 body $ pure unit
   Stream.end writable $ pure unit
 
 setHeader
-  :: forall e. HTTP.Response -> Header -> Eff (http :: HTTP | e) Unit
+  :: forall e. HTTP.Response -> Header -> Eff (http :: HTTP.HTTP | e) Unit
 setHeader response (Tuple name value) =
   HTTP.setHeader response name value
 
 setHeaders
-  :: forall e. HTTP.Response -> Array Header -> Eff (http :: HTTP | e) Unit
+  :: forall e. HTTP.Response -> Array Header -> Eff (http :: HTTP.HTTP | e) Unit
 setHeaders response headers =
   Array.for_ headers (setHeader response)
 
 setStatusCode
-  :: forall e. HTTP.Response -> StatusCode -> Eff (http :: HTTP | e) Unit
+  :: forall e. HTTP.Response -> StatusCode -> Eff (http :: HTTP.HTTP | e) Unit
 setStatusCode response (StatusCode code) =
   HTTP.setStatusCode response code
 
 readBody
   :: forall e
   . HTTP.Request
-  -> Aff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Buffer
+  -> Aff (ServerEff e) Buffer
 readBody request = do
   let readable = HTTP.requestAsStream request
   bv <- AVar.makeEmptyVar
@@ -89,7 +89,7 @@ readBody request = do
 readRequest
   :: forall e
   . HTTP.Request
-  -> Aff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Request
+  -> Aff (ServerEff e) Request
 readRequest request = do
   let
     headers = HTTP.requestHeaders request
@@ -104,7 +104,7 @@ readRequest request = do
     }
 
 writeResponse
-  :: forall e. HTTP.Response -> Response -> Eff (http :: HTTP | e) Unit
+  :: forall e. HTTP.Response -> Response -> Eff (http :: HTTP.HTTP | e) Unit
 writeResponse response { body, headers, status } = do
   _ <- setStatusCode response status
   _ <- setHeaders response headers
@@ -112,10 +112,10 @@ writeResponse response { body, headers, status } = do
 
 handleRequest
   :: forall e
-  . (Request -> Aff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Response)
+  . (Request -> Aff (ServerEff e) Response)
   -> HTTP.Request
   -> HTTP.Response
-  -> Eff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Unit
+  -> Eff (ServerEff e) Unit
 handleRequest onRequest request response = Aff.launchAff_ do
   req <- readRequest request
   res <- onRequest req
@@ -124,9 +124,9 @@ handleRequest onRequest request response = Aff.launchAff_ do
 run
   :: forall e
   . ServerOptions
-  -> Eff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Unit
-  -> (Request -> Aff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Response)
-  -> Eff (avar :: AVAR, buffer :: BUFFER, http :: HTTP | e) Unit
+  -> Eff (ServerEff e) Unit
+  -> (Request -> Aff (ServerEff e) Response)
+  -> Eff (ServerEff e) Unit
 run { hostname, port } onListen onRequest = do
   server <- HTTP.createServer (handleRequest onRequest)
   let
