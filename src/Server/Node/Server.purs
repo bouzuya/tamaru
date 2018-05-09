@@ -14,26 +14,34 @@ import Control.Monad.Aff.AVar (AVAR)
 import Control.Monad.Aff.AVar as AVar
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
-import Data.Foldable as Array
-import Data.Maybe (Maybe(..))
+import Data.Array as Array
+import Data.Foldable as Foldable
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Nullable as Nullable
 import Data.StrMap as StrMap
+import Data.String (Pattern(..))
+import Data.String as String
 import Data.Tuple (Tuple(..))
-import Node.Buffer (BUFFER, Buffer)
+import Global (decodeURIComponent)
+import Node.Buffer (BUFFER)
 import Node.Buffer as Buffer
 import Node.Encoding as Encoding
 import Node.HTTP as HTTP
 import Node.Stream as Stream
-import Prelude (Unit, bind, pure, unit, ($), (<>))
+import Node.URL as URL
+import Prelude (Unit, bind, map, pure, unit, ($), (<>), (>>>))
 
 type ServerEff e = (avar :: AVAR, buffer :: BUFFER, http :: HTTP.HTTP | e)
 type Body = String
 type Header = Tuple String String
 newtype StatusCode = StatusCode Int
 type Request =
-  { body :: String
+  { body :: Body
   , headers :: Array Header
   , method :: String
-  , url :: String }
+  , pathname :: String
+  , searchParams :: Array (Tuple String String)
+  }
 type Response =
   { body :: Body
   , headers :: Array Header
@@ -59,7 +67,7 @@ setHeader response (Tuple name value) =
 setHeaders
   :: forall e. HTTP.Response -> Array Header -> Eff (http :: HTTP.HTTP | e) Unit
 setHeaders response headers =
-  Array.for_ headers (setHeader response)
+  Foldable.for_ headers (setHeader response)
 
 setStatusCode
   :: forall e. HTTP.Response -> StatusCode -> Eff (http :: HTTP.HTTP | e) Unit
@@ -96,12 +104,28 @@ readRequest request = do
     headers = HTTP.requestHeaders request
     method = HTTP.requestMethod request
     url = HTTP.requestURL request
+    urlObject = URL.parse url
+    pathname = fromMaybe "" (Nullable.toMaybe urlObject.pathname)
+    searchParams = maybe [] parseQueryString (Nullable.toMaybe urlObject.query)
+    parseQueryString :: String -> Array (Tuple String String)
+    parseQueryString =
+      String.split (Pattern "&")
+        >>> map (String.split (Pattern "="))
+        >>> map (map decodeURIComponent)
+        >>> map
+          (
+            case _ of
+              [k, v] -> Just (Tuple k v)
+              _ -> Nothing
+          )
+        >>> Array.catMaybes
   body <- readBody request
   pure $
     { body
     , headers: StrMap.foldMap (\k v -> [Tuple k v]) headers
     , method
-    , url
+    , pathname
+    , searchParams
     }
 
 writeResponse

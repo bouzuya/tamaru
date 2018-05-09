@@ -5,19 +5,20 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Data.Foldable (intercalate)
 import Data.Tuple (Tuple(..))
-import Prelude (Unit, pure, (<>))
+import Prelude (Unit, pure, show, (<$>), (<>))
 import Server.Node.Server (Request, Response, ServerEff, StatusCode(..), run)
 
 onRequest
   :: forall e
   . Request
   -> Aff (ServerEff e) Response
-onRequest { body, headers, method, url } = do
+onRequest { body, headers, method, pathname, searchParams } = do
   pure
     { body:
         intercalate ", "
           [ "method: " <> method
-          , "url: " <> url
+          , "pathname: " <> pathname
+          , "query: " <> (intercalate "," (show <$> searchParams))
           , "body: " <> body
           ]
     , headers: [(Tuple "Content-Type" "text/plain"), (Tuple "X-Foo" "bar")]
