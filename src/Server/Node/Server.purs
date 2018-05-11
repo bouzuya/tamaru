@@ -4,7 +4,6 @@ module Server.Node.Server
   , Request
   , Response
   , ServerEff
-  , StatusCode(..)
   , run
   ) where
 
@@ -30,11 +29,11 @@ import Node.HTTP as HTTP
 import Node.Stream as Stream
 import Node.URL as URL
 import Prelude (Unit, bind, map, pure, unit, ($), (<>), (>>>))
+import Server.HTTP.Status (Status(..))
 
 type ServerEff e = (avar :: AVAR, buffer :: BUFFER, http :: HTTP.HTTP | e)
 type Body = String
 type Header = Tuple String String
-newtype StatusCode = StatusCode Int
 type Request =
   { body :: Body
   , headers :: Array Header
@@ -45,7 +44,7 @@ type Request =
 type Response =
   { body :: Body
   , headers :: Array Header
-  , status :: StatusCode
+  , status :: Status
   }
 type ServerOptions =
   { hostname :: String
@@ -70,9 +69,10 @@ setHeaders response headers =
   Foldable.for_ headers (setHeader response)
 
 setStatusCode
-  :: forall e. HTTP.Response -> StatusCode -> Eff (http :: HTTP.HTTP | e) Unit
-setStatusCode response (StatusCode code) =
-  HTTP.setStatusCode response code
+  :: forall e. HTTP.Response -> Status -> Eff (http :: HTTP.HTTP | e) Unit
+setStatusCode response (Status code message) = do
+  _ <- HTTP.setStatusCode response code
+  HTTP.setStatusMessage response message
 
 readBody
   :: forall e

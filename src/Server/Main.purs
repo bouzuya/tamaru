@@ -6,7 +6,8 @@ import Control.Monad.Eff.Console (CONSOLE, log)
 import Data.Foldable (intercalate)
 import Data.Tuple (Tuple(..))
 import Prelude (Unit, pure, show, (<$>), (<>))
-import Server.Node.Server (Request, Response, ServerEff, StatusCode(..), run)
+import Server.Node.Server (Request, Response, ServerEff, run)
+import Server.HTTP.Status (Status(..))
 
 onRequest
   :: forall e
@@ -22,7 +23,7 @@ onRequest { body, headers, method, pathname, searchParams } = do
           , "body: " <> body
           ]
     , headers: [(Tuple "Content-Type" "text/plain"), (Tuple "X-Foo" "bar")]
-    , status: (StatusCode 200)
+    , status: (Status 200 "OK")
     }
 
 onListen :: forall e. Eff (console :: CONSOLE | e) Unit
