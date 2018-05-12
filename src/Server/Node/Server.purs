@@ -7,6 +7,8 @@ module Server.Node.Server
   , run
   ) where
 
+import Bouzuya.HTTP.Method (Method)
+import Bouzuya.HTTP.Method as Method
 import Control.Monad.Aff (Aff, liftEff')
 import Control.Monad.Aff as Aff
 import Control.Monad.Aff.AVar (AVAR)
@@ -37,7 +39,7 @@ type Header = Tuple String String
 type Request =
   { body :: Body
   , headers :: Array Header
-  , method :: String
+  , method :: Method
   , pathname :: String
   , searchParams :: Array (Tuple String String)
   }
@@ -102,7 +104,9 @@ readRequest
 readRequest request = do
   let
     headers = HTTP.requestHeaders request
-    method = HTTP.requestMethod request
+    -- TODO: 405 Method Not Allowed ?
+    method = fromMaybe Method.GET $
+      Method.fromString $ HTTP.requestMethod request
     url = HTTP.requestURL request
     urlObject = URL.parse url
     pathname = fromMaybe "" (Nullable.toMaybe urlObject.pathname)

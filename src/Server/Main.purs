@@ -17,7 +17,7 @@ onRequest { body, headers, method, pathname, searchParams } = do
   pure
     { body:
         intercalate ", "
-          [ "method: " <> method
+          [ "method: " <> show method
           , "pathname: " <> pathname
           , "query: " <> (intercalate "," (show <$> searchParams))
           , "body: " <> body
