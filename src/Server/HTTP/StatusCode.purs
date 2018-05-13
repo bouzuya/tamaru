@@ -1,3 +1,9 @@
+-- See:
+-- RFC 7231
+-- https://tools.ietf.org/html/rfc7231
+--
+-- Hypertext Transfer Protocol (HTTP) Status Code Registry
+-- https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
 module Server.HTTP.StatusCode
   ( Code
   , ReasonPhrase
