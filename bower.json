@@ -12,6 +12,7 @@
     "purescript-bouzuya-http-method": "^0.2.1",
     "purescript-console": "^3.0.0",
     "purescript-node-http": "^4.2.0",
+    "purescript-node-process": "^5.0.0",
     "purescript-prelude": "^3.3.0"
   },
   "devDependencies": {
