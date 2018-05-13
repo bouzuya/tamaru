@@ -31,7 +31,7 @@ import Node.HTTP as HTTP
 import Node.Stream as Stream
 import Node.URL as URL
 import Prelude (Unit, bind, map, pure, unit, ($), (<>), (>>>))
-import Server.HTTP.Status (Status(..))
+import Server.HTTP.StatusCode (StatusCode(..))
 
 type ServerEff e = (avar :: AVAR, buffer :: BUFFER, http :: HTTP.HTTP | e)
 type Body = String
@@ -46,7 +46,7 @@ type Request =
 type Response =
   { body :: Body
   , headers :: Array Header
-  , status :: Status
+  , status :: StatusCode
   }
 type ServerOptions =
   { hostname :: String
@@ -71,8 +71,8 @@ setHeaders response headers =
   Foldable.for_ headers (setHeader response)
 
 setStatusCode
-  :: forall e. HTTP.Response -> Status -> Eff (http :: HTTP.HTTP | e) Unit
-setStatusCode response (Status code message) = do
+  :: forall e. HTTP.Response -> StatusCode -> Eff (http :: HTTP.HTTP | e) Unit
+setStatusCode response (StatusCode code message) = do
   _ <- HTTP.setStatusCode response code
   HTTP.setStatusMessage response message
 
