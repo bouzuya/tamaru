@@ -7,7 +7,7 @@ import Data.Foldable (intercalate)
 import Data.Tuple (Tuple(..))
 import Prelude (Unit, pure, show, (<$>), (<>))
 import Server.Node.Server (Request, Response, ServerEff, run)
-import Server.HTTP.StatusCode (StatusCode(..))
+import Server.HTTP.StatusCode (status200)
 
 onRequest
   :: forall e
@@ -23,7 +23,7 @@ onRequest { body, headers, method, pathname, searchParams } = do
           , "body: " <> body
           ]
     , headers: [(Tuple "Content-Type" "text/plain"), (Tuple "X-Foo" "bar")]
-    , status: (StatusCode 200 "OK")
+    , status: status200
     }
 
 onListen :: forall e. Eff (console :: CONSOLE | e) Unit
