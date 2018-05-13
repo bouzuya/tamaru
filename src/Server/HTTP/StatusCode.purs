@@ -78,19 +78,37 @@ module Server.HTTP.StatusCode
   ) where
 
 import Data.Boolean (otherwise)
+import Data.Eq (class Eq, (==))
 import Data.HeytingAlgebra ((&&))
 import Data.Maybe (Maybe(..))
 import Data.Ord ((<=))
+import Data.Show (class Show)
 
 type Code = Int
 type ReasonPhrase = String
 data StatusCode = StatusCode Code ReasonPhrase
+
+instance eqStatusCode :: Eq StatusCode where
+  eq (StatusCode a _) (StatusCode b _) = a == b
+
+instance showStatusCode :: Show StatusCode where
+  show (StatusCode _ s) = s
+
 data ResponseClass
-  = Informational
-  | Successful
-  | Redirection
-  | ClientError
-  | ServerError
+  = Informational -- 1xx
+  | Successful -- 2xx
+  | Redirection -- 3xx
+  | ClientError -- 4xx
+  | ServerError -- 5xx
+
+derive instance eqResponseClass :: Eq ResponseClass
+
+instance showResponseClass :: Show ResponseClass where
+  show Informational = "1xx (Informational)"
+  show Successful = "2xx (Successful)"
+  show Redirection = "3xx (Redirection)"
+  show ClientError = "4xx (Client Error)"
+  show ServerError = "5xx (Server Error)"
 
 fromInt :: Int -> Maybe StatusCode
 fromInt 100 = Just status100
