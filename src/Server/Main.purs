@@ -1,5 +1,6 @@
 module Server.Main (main) where
 
+import Bouzuya.HTTP.StatusCode (status200, status302, status404)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
@@ -14,7 +15,6 @@ import Data.String as String
 import Data.Tuple (Tuple(..))
 import Node.Process (PROCESS, lookupEnv)
 import Prelude (Unit, bind, not, pure, show, ($), (<$>), (<<<), (<>), (==))
-import Server.HTTP.StatusCode (status200, status302, status404)
 import Server.Node.Server (Request, Response, ServerEff, run)
 import Server.Route (route)
 

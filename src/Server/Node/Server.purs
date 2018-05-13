@@ -9,6 +9,7 @@ module Server.Node.Server
 
 import Bouzuya.HTTP.Method (Method)
 import Bouzuya.HTTP.Method as Method
+import Bouzuya.HTTP.StatusCode (StatusCode(..))
 import Control.Monad.Aff (Aff, liftEff')
 import Control.Monad.Aff as Aff
 import Control.Monad.Aff.AVar (AVAR)
@@ -31,7 +32,6 @@ import Node.HTTP as HTTP
 import Node.Stream as Stream
 import Node.URL as URL
 import Prelude (Unit, bind, map, pure, unit, ($), (<>), (>>>))
-import Server.HTTP.StatusCode (StatusCode(..))
 
 type ServerEff e = (avar :: AVAR, buffer :: BUFFER, http :: HTTP.HTTP | e)
 type Body = String
