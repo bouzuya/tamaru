@@ -1,8 +1,8 @@
 module Server.HTTP.StatusCode
   ( Code
   , ReasonPhrase
-  , StatusCode(..)
   , ResponseClass(..)
+  , StatusCode(..)
   , fromInt
   , getResponseClass
   , isClientError
