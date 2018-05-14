@@ -7,36 +7,16 @@ import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
-import Data.Array as Array
 import Data.Either (Either(..))
-import Data.Foldable (intercalate)
 import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.String (Pattern(..))
-import Data.String as String
 import Node.Process (PROCESS, lookupEnv)
-import Prelude (Unit, bind, not, pure, ($), (<$>), (<<<), (<>), (==))
+import Prelude (Unit, bind, pure, ($), (<$>))
 import Server.DB (db, findGroupAll, findGroupById)
+import Server.Path (parsePath')
 import Server.Response (response200, response302, response404)
 import Server.Route (Action(..), route)
 import Server.View (View(..))
-
-joinPath :: Array String -> String
-joinPath pathPieces = "/" <> (intercalate "/" pathPieces)
-
-splitPath :: String -> Array String
-splitPath path =
-  Array.filter (not <<< String.null) $ String.split (Pattern "/") path
-
-parsePath :: String -> Either String (Array String)
-parsePath pathname =
-  let
-    splittedPath = splitPath pathname
-    normalizedPath = joinPath splittedPath
-  in
-    if pathname == normalizedPath
-    then Right splittedPath
-    else Left normalizedPath
 
 handleAction :: forall e. Action -> Request -> Aff (ServerEff e) Response
 handleAction GetGroupList _ = do
@@ -60,7 +40,7 @@ onRequest
   . Request
   -> Aff (ServerEff e) Response
 onRequest request@{ method, pathname } = do
-  case parsePath pathname of
+  case parsePath' pathname of
     Left location ->
       pure $ response302 location
     Right normalizedPath ->
