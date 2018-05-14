@@ -1,5 +1,6 @@
 module Server.Main (main) where
 
+import Bouzuya.HTTP.Server.Node (Request, Response, ServerEff, run)
 import Bouzuya.HTTP.StatusCode (status200, status302, status404)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
@@ -16,7 +17,6 @@ import Data.Tuple (Tuple(..))
 import Node.Process (PROCESS, lookupEnv)
 import Prelude (Unit, bind, not, pure, show, ($), (<$>), (<<<), (<>), (==))
 import Server.DB (db, findGroupAll, findGroupById)
-import Server.Node.Server (Request, Response, ServerEff, run)
 import Server.Route (Action(..), route)
 import Server.View (View(..))
 

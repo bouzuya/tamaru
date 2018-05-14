@@ -2,12 +2,12 @@ module Server.View
   ( View(..)
   ) where
 
+import Bouzuya.HTTP.Server.Node (Request)
 import Data.Foldable (intercalate)
 import Data.Function (($))
 import Data.Functor ((<$>))
 import Data.Semigroup ((<>))
 import Data.Show (class Show, show)
-import Server.Node.Server (Request)
 import Server.Model (Group)
 
 data View

@@ -1,4 +1,4 @@
-module Server.Node.Server
+module Bouzuya.HTTP.Server.Node
   ( Body
   , Header
   , Request
