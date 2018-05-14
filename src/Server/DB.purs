@@ -1,10 +1,5 @@
 module Server.DB
   ( DB
-  , Data
-  , DataId
-  , DataValue
-  , Group
-  , GroupId
   , db
   , findGroupAll
   , findGroupById
@@ -13,19 +8,9 @@ module Server.DB
 import Data.Eq ((==))
 import Data.Foldable (find)
 import Data.Maybe (Maybe)
+import Server.Model (Group, GroupId)
 
 type DB = Array Group
-type GroupId = String -- "[a-z][0-9a-z_]"
-type DataId = String -- "YYYY-MM-DD"
-type DataValue = String -- "\d+(\.\d+)?"
-type Group =
-  { id :: GroupId
-  , data :: Array Data
-  }
-type Data =
-  { id :: DataId
-  , value :: DataValue
-  }
 
 db :: DB
 db =
@@ -46,7 +31,7 @@ db =
   ]
 
 findGroupAll :: DB -> Array Group
-findGroupAll db = db
+findGroupAll d = d
 
 findGroupById :: DB -> GroupId -> Maybe Group
-findGroupById db groupId = find (\{ id } -> id == groupId) db
+findGroupById d groupId = find (\{ id } -> id == groupId) d
