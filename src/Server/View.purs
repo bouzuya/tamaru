@@ -2,7 +2,7 @@ module Server.View
   ( View(..)
   ) where
 
-import Bouzuya.HTTP.Server.Node (Request)
+import Bouzuya.HTTP.Request (Request)
 import Data.Foldable (intercalate)
 import Data.Function (($))
 import Data.Functor ((<$>))

@@ -1,6 +1,8 @@
 module Server.Main (main) where
 
-import Bouzuya.HTTP.Server.Node (Request, Response, ServerEff, run)
+import Bouzuya.HTTP.Request (Request)
+import Bouzuya.HTTP.Response (Response)
+import Bouzuya.HTTP.Server.Node (ServerEff, run)
 import Bouzuya.HTTP.StatusCode (status200, status302, status404)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)

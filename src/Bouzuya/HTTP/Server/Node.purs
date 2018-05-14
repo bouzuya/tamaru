@@ -1,14 +1,13 @@
 module Bouzuya.HTTP.Server.Node
   ( Body
-  , Header
-  , Request
-  , Response
   , ServerEff
   , run
   ) where
 
-import Bouzuya.HTTP.Method (Method)
+import Bouzuya.HTTP.Header (Header)
 import Bouzuya.HTTP.Method as Method
+import Bouzuya.HTTP.Request (Request)
+import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.StatusCode (StatusCode(..))
 import Control.Monad.Aff (Aff, liftEff')
 import Control.Monad.Aff as Aff
@@ -35,19 +34,6 @@ import Prelude (Unit, bind, map, pure, unit, ($), (<>), (>>>))
 
 type ServerEff e = (avar :: AVAR, buffer :: BUFFER, http :: HTTP.HTTP | e)
 type Body = String
-type Header = Tuple String String
-type Request =
-  { body :: Body
-  , headers :: Array Header
-  , method :: Method
-  , pathname :: String
-  , searchParams :: Array (Tuple String String)
-  }
-type Response =
-  { body :: Body
-  , headers :: Array Header
-  , status :: StatusCode
-  }
 type ServerOptions =
   { hostname :: String
   , port :: Int
