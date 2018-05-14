@@ -3,7 +3,6 @@ module Server.Main (main) where
 import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.Server.Node (ServerEff, run)
-import Bouzuya.HTTP.StatusCode (status200, status302, status404)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
@@ -15,10 +14,10 @@ import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String (Pattern(..))
 import Data.String as String
-import Data.Tuple (Tuple(..))
 import Node.Process (PROCESS, lookupEnv)
-import Prelude (Unit, bind, not, pure, show, ($), (<$>), (<<<), (<>), (==))
+import Prelude (Unit, bind, not, pure, ($), (<$>), (<<<), (<>), (==))
 import Server.DB (db, findGroupAll, findGroupById)
+import Server.Response (response200, response302, response404)
 import Server.Route (Action(..), route)
 import Server.View (View(..))
 
@@ -38,27 +37,6 @@ parsePath pathname =
     if pathname == normalizedPath
     then Right splittedPath
     else Left normalizedPath
-
-response200 :: View -> Response
-response200 view =
-  { body: show view
-  , headers: [(Tuple "Content-Type" "text/plain")]
-  , status: status200
-  }
-
-response302 :: String -> Response
-response302 location =
-  { body: ""
-  , headers: [Tuple "Location" location]
-  , status: status302
-  }
-
-response404 :: Response
-response404 =
-  { body: ""
-  , headers: [(Tuple "Content-Type" "text/plain")]
-  , status: status404
-  }
 
 handleAction :: forall e. Action -> Request -> Aff (ServerEff e) Response
 handleAction GetGroupList _ = do
