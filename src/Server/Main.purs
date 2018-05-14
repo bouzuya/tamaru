@@ -86,7 +86,7 @@ onRequest
   :: forall e
   . Request
   -> Aff (ServerEff e) Response
-onRequest request@{ body, headers, method, pathname, searchParams } = do
+onRequest request@{ method, pathname } = do
   case parsePath pathname of
     Left location ->
       pure $ response302 location
