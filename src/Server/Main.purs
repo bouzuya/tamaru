@@ -15,8 +15,9 @@ import Data.String as String
 import Data.Tuple (Tuple(..))
 import Node.Process (PROCESS, lookupEnv)
 import Prelude (Unit, bind, not, pure, show, ($), (<$>), (<<<), (<>), (==))
+import Server.DB (db, findGroupAll)
 import Server.Node.Server (Request, Response, ServerEff, run)
-import Server.Route (route)
+import Server.Route (Action(..), route)
 
 joinPath :: Array String -> String
 joinPath pathPieces = "/" <> (intercalate "/" pathPieces)
@@ -35,11 +36,33 @@ parsePath pathname =
     then Right splittedPath
     else Left normalizedPath
 
+handleAction :: forall e. Action -> Request -> Aff (ServerEff e) Response
+handleAction GetGroupList { body, headers, method, pathname, searchParams } = do
+  groups <- pure $ findGroupAll db
+  pure
+    { body: "[" <> (intercalate "," $ (\{ id } -> show id) <$> groups) <> "]"
+    , headers: [(Tuple "Content-Type" "text/plain")]
+    , status: status200
+    }
+handleAction action { body, headers, method, pathname, searchParams } =
+  pure
+    { body:
+        intercalate ", "
+          [ "method: " <> show method
+          , "pathname: " <> pathname
+          , "query: " <> (intercalate "," (show <$> searchParams))
+          , "body: " <> body
+          , "action: " <> show action
+          ]
+    , headers: [(Tuple "Content-Type" "text/plain"), (Tuple "X-Foo" "bar")]
+    , status: status200
+    }
+
 onRequest
   :: forall e
   . Request
   -> Aff (ServerEff e) Response
-onRequest { body, headers, method, pathname, searchParams } = do
+onRequest request@{ body, headers, method, pathname, searchParams } = do
   case parsePath pathname of
     Left location ->
       pure
@@ -56,18 +79,7 @@ onRequest { body, headers, method, pathname, searchParams } = do
           , status: status404
           }
       Just action ->
-        pure
-          { body:
-              intercalate ", "
-                [ "method: " <> show method
-                , "pathname: " <> pathname
-                , "query: " <> (intercalate "," (show <$> searchParams))
-                , "body: " <> body
-                , "action: " <> show action
-                ]
-          , headers: [(Tuple "Content-Type" "text/plain"), (Tuple "X-Foo" "bar")]
-          , status: status200
-          }
+        handleAction action request
 
 onListen :: forall e. Eff (console :: CONSOLE | e) Unit
 onListen = log "listening..."
