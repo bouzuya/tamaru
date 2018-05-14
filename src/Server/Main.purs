@@ -37,9 +37,9 @@ parsePath pathname =
     then Right splittedPath
     else Left normalizedPath
 
-response200 :: String -> Response
-response200 body =
-  { body
+response200 :: View -> Response
+response200 view =
+  { body: show view
   , headers: [(Tuple "Content-Type" "text/plain")]
   , status: status200
   }
@@ -62,7 +62,7 @@ handleAction :: forall e. Action -> Request -> Aff (ServerEff e) Response
 handleAction GetGroupList _ = do
   groups <- pure $ findGroupAll db
   view <- pure $ GroupListView groups
-  pure $ response200 $ show view
+  pure $ response200 view
 handleAction (GetGroup groupId) _ = do
   groupMaybe <- pure $ findGroupById db groupId
   case groupMaybe of
@@ -70,17 +70,10 @@ handleAction (GetGroup groupId) _ = do
       pure response404
     Just group -> do
       view <- pure $ GroupView group
-      pure $ response200 $ show view
-handleAction action { body, headers, method, pathname, searchParams } =
-  pure $
-    response200 $
-      intercalate ", "
-        [ "method: " <> show method
-        , "pathname: " <> pathname
-        , "query: " <> (intercalate "," (show <$> searchParams))
-        , "body: " <> body
-        , "action: " <> show action
-        ]
+      pure $ response200 view
+handleAction action request = do
+  view <- pure $ RequestView request
+  pure $ response200 view
 
 onRequest
   :: forall e
