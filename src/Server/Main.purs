@@ -18,6 +18,7 @@ import Prelude (Unit, bind, not, pure, show, ($), (<$>), (<<<), (<>), (==))
 import Server.DB (db, findGroupAll, findGroupById)
 import Server.Node.Server (Request, Response, ServerEff, run)
 import Server.Route (Action(..), route)
+import Server.View (View(..))
 
 joinPath :: Array String -> String
 joinPath pathPieces = "/" <> (intercalate "/" pathPieces)
@@ -60,17 +61,16 @@ response404 =
 handleAction :: forall e. Action -> Request -> Aff (ServerEff e) Response
 handleAction GetGroupList _ = do
   groups <- pure $ findGroupAll db
-  pure $
-    response200 $
-      "[" <> (intercalate "," $ (\{ id } -> show id) <$> groups) <> "]"
+  view <- pure $ GroupListView groups
+  pure $ response200 $ show view
 handleAction (GetGroup groupId) _ = do
   groupMaybe <- pure $ findGroupById db groupId
-  pure $
-    case groupMaybe of
-      Nothing ->
-        response404
-      Just group ->
-        response200 $ "{\"id\":\"" <> group.id <> "\"}"
+  case groupMaybe of
+    Nothing ->
+      pure response404
+    Just group -> do
+      view <- pure $ GroupView group
+      pure $ response200 $ show view
 handleAction action { body, headers, method, pathname, searchParams } =
   pure $
     response200 $
