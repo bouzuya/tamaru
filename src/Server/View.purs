@@ -8,14 +8,20 @@ import Data.Function (($))
 import Data.Functor ((<$>))
 import Data.Semigroup ((<>))
 import Data.Show (class Show, show)
-import Server.Model (Group)
+import Server.Model (Group, Data)
 
 data View
-  = GroupListView (Array Group)
+  = DataListView (Array Data)
+  | GroupListView (Array Group)
   | GroupView Group
   | RequestView Request
 
 instance showView :: Show View where
+  show (DataListView allData) =
+    "[" <> (intercalate "," $ showData <$> allData) <> "]"
+    where
+      showData { id, value } =
+        "{\"id\":\"" <> id <> "\",\"value\":\"" <> value <> "\"}"
   show (GroupListView groups) =
     "[" <> (intercalate "," $ (\{ id } -> show id) <$> groups) <> "]"
   show (GroupView group) =

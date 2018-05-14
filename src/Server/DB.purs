@@ -1,14 +1,17 @@
 module Server.DB
   ( DB
   , db
+  , findDataAllByGroupId
+  , findDataByGroupIdAndDataId
   , findGroupAll
   , findGroupById
   ) where
 
+import Control.Bind ((<$>), (>>=))
 import Data.Eq ((==))
 import Data.Foldable (find)
 import Data.Maybe (Maybe)
-import Server.Model (Group, GroupId)
+import Server.Model (Data, Group, GroupId, DataId)
 
 type DB = Array Group
 
@@ -29,6 +32,13 @@ db =
       ]
     }
   ]
+
+findDataAllByGroupId :: DB -> GroupId -> Maybe (Array Data)
+findDataAllByGroupId d groupId = _.data <$> (findGroupById d groupId)
+
+findDataByGroupIdAndDataId :: DB -> GroupId -> DataId -> Maybe Data
+findDataByGroupIdAndDataId d groupId dataId =
+  (findDataAllByGroupId d groupId) >>= (find (\{ id } -> id == dataId))
 
 findGroupAll :: DB -> Array Group
 findGroupAll d = d
