@@ -15,7 +15,7 @@ import Data.String as String
 import Data.Tuple (Tuple(..))
 import Node.Process (PROCESS, lookupEnv)
 import Prelude (Unit, bind, not, pure, show, ($), (<$>), (<<<), (<>), (==))
-import Server.DB (db, findGroupAll)
+import Server.DB (db, findGroupAll, findGroupById)
 import Server.Node.Server (Request, Response, ServerEff, run)
 import Server.Route (Action(..), route)
 
@@ -37,13 +37,27 @@ parsePath pathname =
     else Left normalizedPath
 
 handleAction :: forall e. Action -> Request -> Aff (ServerEff e) Response
-handleAction GetGroupList { body, headers, method, pathname, searchParams } = do
+handleAction GetGroupList _ = do
   groups <- pure $ findGroupAll db
   pure
     { body: "[" <> (intercalate "," $ (\{ id } -> show id) <$> groups) <> "]"
     , headers: [(Tuple "Content-Type" "text/plain")]
     , status: status200
     }
+handleAction (GetGroup groupId) _ = do
+  groupMaybe <- pure $ findGroupById db groupId
+  pure $
+    case groupMaybe of
+      Nothing ->
+        { body: ""
+        , headers: [(Tuple "Content-Type" "text/plain")]
+        , status: status404
+        }
+      Just group ->
+        { body: "{\"id\":\"" <> group.id <> "\"}"
+        , headers: [(Tuple "Content-Type" "text/plain")]
+        , status: status200
+        }
 handleAction action { body, headers, method, pathname, searchParams } =
   pure
     { body:
