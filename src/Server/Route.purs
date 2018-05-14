@@ -1,7 +1,7 @@
 module Server.Route
   ( Action(..)
-  , GroupId
-  , DataId
+  , GroupIdLike
+  , DataIdLike
   , route
   ) where
 
@@ -10,15 +10,15 @@ import Prelude
 import Bouzuya.HTTP.Method (Method(..))
 import Data.Maybe (Maybe(..))
 
-type GroupId = String
-type DataId = String
+type GroupIdLike = String
+type DataIdLike = String
 
 data Action
   = GetIndex
   | GetGroupList
-  | GetGroup GroupId
-  | GetGroupDataList GroupId
-  | GetGroupData GroupId DataId
+  | GetGroup GroupIdLike
+  | GetGroupDataList GroupIdLike
+  | GetGroupData GroupIdLike DataIdLike
 
 instance showAction :: Show Action where
   show GetIndex = "GetIndex"
