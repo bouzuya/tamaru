@@ -12,7 +12,7 @@ import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe)
 import Node.Process (PROCESS, lookupEnv)
 import Prelude (Unit, bind, pure, ($), (<$>))
-import Server.DB (db, findDataAllByGroupId, findGroupAll, findGroupById)
+import Server.DB (db, findDataAllByGroupId, findDataByGroupIdAndDataId, findGroupAll, findGroupById)
 import Server.Path (parsePath')
 import Server.Response (response200, response302, response404)
 import Server.Route (Action(..), route)
@@ -38,6 +38,14 @@ handleAction (GetGroupDataList groupId) _ = do
       pure response404
     Just allData -> do
       view <- pure $ DataListView allData
+      pure $ response200 view
+handleAction (GetGroupData groupId dataId) _ = do
+  dataMaybe <- pure $ findDataByGroupIdAndDataId db groupId dataId
+  case dataMaybe of
+    Nothing ->
+      pure response404
+    Just d -> do
+      view <- pure $ DataView d
       pure $ response200 view
 handleAction action request = do
   view <- pure $ RequestView request
