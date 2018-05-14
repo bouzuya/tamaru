@@ -36,41 +36,51 @@ parsePath pathname =
     then Right splittedPath
     else Left normalizedPath
 
+response200 :: String -> Response
+response200 body =
+  { body
+  , headers: [(Tuple "Content-Type" "text/plain")]
+  , status: status200
+  }
+
+response302 :: String -> Response
+response302 location =
+  { body: ""
+  , headers: [Tuple "Location" location]
+  , status: status302
+  }
+
+response404 :: Response
+response404 =
+  { body: ""
+  , headers: [(Tuple "Content-Type" "text/plain")]
+  , status: status404
+  }
+
 handleAction :: forall e. Action -> Request -> Aff (ServerEff e) Response
 handleAction GetGroupList _ = do
   groups <- pure $ findGroupAll db
-  pure
-    { body: "[" <> (intercalate "," $ (\{ id } -> show id) <$> groups) <> "]"
-    , headers: [(Tuple "Content-Type" "text/plain")]
-    , status: status200
-    }
+  pure $
+    response200 $
+      "[" <> (intercalate "," $ (\{ id } -> show id) <$> groups) <> "]"
 handleAction (GetGroup groupId) _ = do
   groupMaybe <- pure $ findGroupById db groupId
   pure $
     case groupMaybe of
       Nothing ->
-        { body: ""
-        , headers: [(Tuple "Content-Type" "text/plain")]
-        , status: status404
-        }
+        response404
       Just group ->
-        { body: "{\"id\":\"" <> group.id <> "\"}"
-        , headers: [(Tuple "Content-Type" "text/plain")]
-        , status: status200
-        }
+        response200 $ "{\"id\":\"" <> group.id <> "\"}"
 handleAction action { body, headers, method, pathname, searchParams } =
-  pure
-    { body:
-        intercalate ", "
-          [ "method: " <> show method
-          , "pathname: " <> pathname
-          , "query: " <> (intercalate "," (show <$> searchParams))
-          , "body: " <> body
-          , "action: " <> show action
-          ]
-    , headers: [(Tuple "Content-Type" "text/plain"), (Tuple "X-Foo" "bar")]
-    , status: status200
-    }
+  pure $
+    response200 $
+      intercalate ", "
+        [ "method: " <> show method
+        , "pathname: " <> pathname
+        , "query: " <> (intercalate "," (show <$> searchParams))
+        , "body: " <> body
+        , "action: " <> show action
+        ]
 
 onRequest
   :: forall e
@@ -79,21 +89,13 @@ onRequest
 onRequest request@{ body, headers, method, pathname, searchParams } = do
   case parsePath pathname of
     Left location ->
-      pure
-        { body: ""
-        , headers: [Tuple "Location" location]
-        , status: status302
-        }
+      pure $ response302 location
     Right normalizedPath ->
-    case route method normalizedPath of
-      Nothing ->
-        pure
-          { body: ""
-          , headers: [(Tuple "Content-Type" "text/plain")]
-          , status: status404
-          }
-      Just action ->
-        handleAction action request
+      case route method normalizedPath of
+        Nothing ->
+          pure response404
+        Just action ->
+          handleAction action request
 
 onListen :: forall e. Eff (console :: CONSOLE | e) Unit
 onListen = log "listening..."
