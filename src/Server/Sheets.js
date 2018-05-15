@@ -8,13 +8,19 @@ exports.createClientImpl = function (key) {
   };
 };
 
-exports.getValuesImpl = function (client) {
+exports.getRowsImpl = function (client) {
   return function (spreadsheetId) {
     return function (range) {
       return function () {
         return new Promise(function (resolve, reject) {
           return client.spreadsheets.values.get(
-            { range: range, spreadsheetId: spreadsheetId },
+            {
+              dateTimeRenderOption: "SERIAL_NUMBER",
+              majorDimension: "ROWS",
+              range: range,
+              spreadsheetId: spreadsheetId,
+              valueRenderOption: "UNFORMATTED_VALUE"
+            },
             function (error, response) {
               if (error) {
                 reject(error);
