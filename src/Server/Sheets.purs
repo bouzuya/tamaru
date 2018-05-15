@@ -14,7 +14,7 @@ import Control.Promise (Promise)
 import Control.Promise as Promise
 import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
-import Server.Model (Data)
+import Server.Model (Data, GroupId)
 
 type Key = String
 type SpreadsheetId = String
@@ -25,6 +25,8 @@ data Client
 foreign import createClientImpl :: forall e. Key -> Eff e Client
 foreign import getRowsImpl
   :: forall e. Client -> SpreadsheetId -> Range -> Eff e (Promise (Array Row))
+foreign import getSheetTitlesImpl
+  :: forall e. Client -> SpreadsheetId -> Eff e (Promise (Array String))
 
 getDataList :: forall e. Aff e (Array Data)
 getDataList = do
@@ -38,3 +40,11 @@ getDataList = do
   where
     toData [id, value] = Just { id, value }
     toData _ = Nothing
+
+getGroupIdList :: forall e. Aff e (Array GroupId)
+getGroupIdList = do
+  let
+    key = "__KEY__"
+    spreadsheetId = "__SPREADSHEET_ID__"
+  client <- liftEff $ createClientImpl key
+  liftEff (getSheetTitlesImpl client spreadsheetId) >>= Promise.toAff

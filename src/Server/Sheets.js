@@ -33,3 +33,28 @@ exports.getRowsImpl = function (client) {
     };
   };
 };
+
+exports.getSheetTitlesImpl = function (client) {
+  return function (spreadsheetId) {
+    return function () {
+      return new Promise(function (resolve, reject) {
+        return client.spreadsheets.get(
+          {
+            includeGridData: false,
+            spreadsheetId: spreadsheetId
+          },
+          function (error, response) {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(
+                response.data.sheets.map(function (i) {
+                  return i.properties.title;
+                })
+              );
+            }
+          });
+      });
+    };
+  };
+};
