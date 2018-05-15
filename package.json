@@ -6,6 +6,9 @@
   "bugs": {
     "url": "https://github.com/bouzuya/tamaru/issues"
   },
+  "dependencies": {
+    "googleapis": "^30.0.0"
+  },
   "devDependencies": {
     "bower": "^1.8.4",
     "nodemon": "^1.17.4",
