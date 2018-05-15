@@ -4,15 +4,16 @@ module Server.Sheets
   , getGroupList
   ) where
 
-import Prelude
-
+import Control.Bind (bind, pure, (<$>), (>>=))
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Promise (Promise)
 import Control.Promise as Promise
 import Data.Array (catMaybes)
+import Data.Function (($))
 import Data.Maybe (Maybe(..))
+import Data.Semigroup ((<>))
 import Data.Traversable (sequence)
 import Server.Model (Data, GroupId, Group)
 
@@ -30,7 +31,7 @@ getDataList :: forall e. Key -> SpreadsheetId -> GroupId -> Aff e (Array Data)
 getDataList key spreadsheetId groupId = do
   let range = groupId <> "!A:B"
   rows <- liftEff (getRowsImpl key spreadsheetId range) >>= Promise.toAff
-  pure $ catMaybes (map toData rows)
+  pure $ catMaybes (toData <$> rows)
   where
     toData [id, value] = Just { id, value }
     toData _ = Nothing
