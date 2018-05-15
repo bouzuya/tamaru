@@ -8,7 +8,8 @@
     "output"
   ],
   "dependencies": {
-    "purescript-aff": "^4.1.1",
+    "purescript-aff": "^4.0.0",
+    "purescript-aff-promise": "^1.0.0",
     "purescript-argonaut": "^3.1.0",
     "purescript-bouzuya-http-method": "^0.2.1",
     "purescript-bouzuya-http-status-code": "^0.1.0",
