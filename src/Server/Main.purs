@@ -6,16 +6,22 @@ import Bouzuya.HTTP.Server.Node (ServerEff, run)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
+import Control.Monad.Eff.Exception (EXCEPTION, throw)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import Data.Either (Either(..))
 import Data.Int as Int
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Node.Process (PROCESS, lookupEnv)
 import Prelude (Unit, bind, pure, ($), (<$>))
 import Server.Action (handleAction)
 import Server.Path (parsePath')
 import Server.Response (response302, response404)
 import Server.Route (route)
+
+type Config =
+  { googleApiKey :: String
+  , spreadsheetId :: String
+  }
 
 onRequest
   :: forall e
@@ -38,11 +44,18 @@ onListen = log "listening..."
 main
   :: forall e
   . Eff
-    (ServerEff (console :: CONSOLE, process :: PROCESS | e))
+    (ServerEff
+      (console :: CONSOLE, exception :: EXCEPTION, process :: PROCESS | e)
+    )
     Unit
 main = do
+  configMaybe <- runMaybeT do
+    googleApiKey <- MaybeT $ lookupEnv "GOOGLE_API_KEY"
+    spreadsheetId <- MaybeT $ lookupEnv "SPREADSHEET_ID"
+    pure { googleApiKey, spreadsheetId }
+  config <- maybe (throw "INVALID ENV") pure configMaybe
   port <- fromMaybe 3000 <$> runMaybeT do
     portString <- MaybeT $ lookupEnv "PORT"
     MaybeT $ pure $ Int.fromString portString
-  let options = { hostname: "0.0.0.0", port }
-  run options onListen onRequest
+  let serverOptions = { hostname: "0.0.0.0", port }
+  run serverOptions onListen onRequest
