@@ -14,7 +14,7 @@ exports.getRowsImpl = function (key) {
               majorDimension: "ROWS",
               range: range,
               spreadsheetId: spreadsheetId,
-              valueRenderOption: "UNFORMATTED_VALUE"
+              valueRenderOption: "FORMATTED_VALUE"
             },
             function (error, response) {
               if (error) {
