@@ -1,5 +1,6 @@
 module Server.DB
-  ( DB
+  ( Context
+  , DB
   , db
   , findDataAllByGroupId
   , findDataByGroupIdAndDataId
@@ -8,11 +9,13 @@ module Server.DB
   ) where
 
 import Control.Bind ((<$>), (>>=))
+import Control.Monad.Eff.AVar (AVar)
 import Data.Eq ((==))
 import Data.Foldable (find)
 import Data.Maybe (Maybe)
 import Server.Model (Data, Group, GroupId, DataId)
 
+type Context = AVar DB
 type DB = Array Group
 
 db :: DB
