@@ -45,6 +45,6 @@ getGroupList key spreadsheetId = do
   groupIds <- getGroupIdList key spreadsheetId
   sequence $ (getGroup key spreadsheetId) <$> groupIds
   where
-    getGroup key spreadsheetId groupId = do
-      dataList <- getDataList key spreadsheetId groupId
+    getGroup k s groupId = do
+      dataList <- getDataList k s groupId
       pure { id: groupId, data: dataList }
