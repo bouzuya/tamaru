@@ -1,5 +1,8 @@
 module Server.Action
-  ( handleAction
+  ( Action(..)
+  , GroupIdLike
+  , DataIdLike
+  , handleAction
   ) where
 
 import Bouzuya.HTTP.Request (Request)
@@ -8,11 +11,30 @@ import Bouzuya.HTTP.Server.Node (ServerEff)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Aff.AVar (readVar)
 import Data.Maybe (Maybe(..))
-import Prelude (bind, pure, ($))
+import Prelude (class Show, bind, pure, ($), (<>))
 import Server.DB (Context, findDataAllByGroupId, findDataByGroupIdAndDataId, findGroupAll, findGroupById)
 import Server.Response (response200, response404)
-import Server.Route (Action(..))
 import Server.View (View(..))
+
+type GroupIdLike = String
+type DataIdLike = String
+
+data Action
+  = GetIndex
+  | GetGroupList
+  | GetGroup GroupIdLike
+  | GetGroupDataList GroupIdLike
+  | CreateGroupData GroupIdLike
+  | GetGroupData GroupIdLike DataIdLike
+
+instance showAction :: Show Action where
+  show GetIndex = "GetIndex"
+  show GetGroupList = "GetGroupList"
+  show (GetGroup groupId) = "GetGroup(" <> groupId <> ")"
+  show (GetGroupDataList groupId) = "GetGroupDataList(" <> groupId <> ")"
+  show (CreateGroupData groupId) = "CreateGroupData(" <> groupId <> ")"
+  show (GetGroupData groupId dataId)
+    = "GetGroupData(" <> groupId <> "," <> dataId <> ")"
 
 handleAction :: forall e. Context -> Action -> Request -> Aff (ServerEff e) Response
 handleAction context GetGroupList _ = do
