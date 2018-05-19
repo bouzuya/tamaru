@@ -9,7 +9,6 @@ import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.Server.Node (ServerEff)
 import Control.Monad.Aff (Aff)
-import Control.Monad.Aff.AVar (readVar)
 import Data.Maybe (Maybe(..))
 import Prelude (class Show, bind, pure, ($), (<>))
 import Server.DB (Context, findDataAllByGroupId, findDataByGroupIdAndDataId, findGroupAll, findGroupById)
@@ -41,13 +40,11 @@ instance showAction :: Show Action where
 
 handleAction :: forall e. Context -> Action -> Request -> Aff (ServerEff e) Response
 handleAction context GetGroupList _ = do
-  db <- readVar context
-  groups <- pure $ findGroupAll db
+  groups <- findGroupAll context
   view <- pure $ GroupListView groups
   pure $ response200 view
 handleAction context (GetGroup groupId) _ = do
-  db <- readVar context
-  groupMaybe <- pure $ findGroupById db groupId
+  groupMaybe <- findGroupById context groupId
   case groupMaybe of
     Nothing ->
       pure response404
@@ -55,8 +52,7 @@ handleAction context (GetGroup groupId) _ = do
       view <- pure $ GroupView group
       pure $ response200 view
 handleAction context (GetGroupDataList groupId) _ = do
-  db <- readVar context
-  allDataMaybe <- pure $ findDataAllByGroupId db groupId
+  allDataMaybe <- findDataAllByGroupId context groupId
   case allDataMaybe of
     Nothing ->
       pure response404
@@ -64,8 +60,7 @@ handleAction context (GetGroupDataList groupId) _ = do
       view <- pure $ DataListView allData
       pure $ response200 view
 handleAction context (GetGroupData groupId dataId) _ = do
-  db <- readVar context
-  dataMaybe <- pure $ findDataByGroupIdAndDataId db groupId dataId
+  dataMaybe <- findDataByGroupIdAndDataId context groupId dataId
   case dataMaybe of
     Nothing ->
       pure response404
