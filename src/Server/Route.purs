@@ -14,4 +14,6 @@ route GET ["groups", groupId, "data"] = Just (GetGroupDataList groupId)
 route POST ["groups", groupId, "data"] = Just (CreateGroupData groupId)
 route GET ["groups", groupId, "data", dataId]
   = Just (GetGroupData groupId dataId)
+route PUT ["groups", groupId, "data", dataId]
+  = Just (UpdateGroupData groupId dataId)
 route _ _ = Nothing

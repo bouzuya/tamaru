@@ -26,6 +26,7 @@ data Action
   | GetGroupDataList GroupIdLike
   | CreateGroupData GroupIdLike
   | GetGroupData GroupIdLike DataIdLike
+  | UpdateGroupData GroupIdLike DataIdLike
 
 instance showAction :: Show Action where
   show GetIndex = "GetIndex"
@@ -35,6 +36,8 @@ instance showAction :: Show Action where
   show (CreateGroupData groupId) = "CreateGroupData(" <> groupId <> ")"
   show (GetGroupData groupId dataId)
     = "GetGroupData(" <> groupId <> "," <> dataId <> ")"
+  show (UpdateGroupData groupId dataId)
+    = "UpdateGroupData(" <> groupId <> "," <> dataId <> ")"
 
 handleAction :: forall e. Context -> Action -> Request -> Aff (ServerEff e) Response
 handleAction context GetGroupList _ = do
