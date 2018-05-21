@@ -54,3 +54,37 @@ exports.getSheetTitlesImpl = function (key) {
     };
   };
 };
+
+exports.setRowsImpl = function (key) {
+  return function (spreadsheetId) {
+    return function (range) {
+      return function (rows) {
+        return function () {
+          return new Promise(function (resolve, reject) {
+            var client = google.sheets({ auth: key, version: 'v4' });
+            return client.spreadsheets.values.append(
+              {
+                includeValuesInResponse: false,
+                insertDataOption: 'OVERWRITE',
+                range: range,
+                requestBody: {
+                  majorDimension: 'ROWS',
+                  range: range,
+                  values: rows
+                },
+                spreadsheetId: spreadsheetId,
+                valueInputOption: 'RAW'
+              },
+              function (error, response) {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(response.data.values);
+                }
+              });
+          });
+        };
+      };
+    };
+  };
+};

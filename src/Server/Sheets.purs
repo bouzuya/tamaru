@@ -15,6 +15,7 @@ import Data.Function (($))
 import Data.Maybe (Maybe(..))
 import Data.Semigroup ((<>))
 import Data.Traversable (sequence)
+import Data.Unit (Unit)
 import Server.Model (Data, GroupId, Group)
 
 type Key = String
@@ -26,6 +27,8 @@ foreign import getRowsImpl
   :: forall e. Key -> SpreadsheetId -> Range -> Eff e (Promise (Array Row))
 foreign import getSheetTitlesImpl
   :: forall e. Key -> SpreadsheetId -> Eff e (Promise (Array String))
+foreign import setRowsImpl
+  :: forall e. Key -> SpreadsheetId -> Range -> Array Row -> Eff e (Promise Unit)
 
 getDataList :: forall e. Key -> SpreadsheetId -> GroupId -> Aff e (Array Data)
 getDataList key spreadsheetId groupId = do
