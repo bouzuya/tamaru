@@ -28,7 +28,7 @@ foreign import getRowsImpl
 foreign import getSheetTitlesImpl
   :: forall e. Key -> SpreadsheetId -> Eff e (Promise (Array String))
 foreign import setRowsImpl
-  :: forall e. Key -> SpreadsheetId -> Range -> Array Row -> Eff e (Promise Unit)
+  :: forall e. String -> Key -> SpreadsheetId -> Range -> Array Row -> Eff e (Promise Unit)
 
 getDataList :: forall e. Key -> SpreadsheetId -> GroupId -> Aff e (Array Data)
 getDataList key spreadsheetId groupId = do
