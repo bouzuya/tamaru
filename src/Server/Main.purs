@@ -13,6 +13,8 @@ import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import Data.Either (Either(..))
 import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.String (Pattern(..), Replacement(..))
+import Data.String as String
 import Node.Process (PROCESS, lookupEnv)
 import Prelude (Unit, bind, pure, ($), (<$>))
 import Server.Action (handleAction)
@@ -23,7 +25,8 @@ import Server.Route (route)
 import Server.Sheets (getGroupList)
 
 type Config =
-  { googleApiKey :: String
+  { googleApiClientEmail :: String
+  , googleApiPrivateKey :: String
   , spreadsheetId :: String
   }
 
@@ -55,11 +58,18 @@ main
     Unit
 main = launchAff_ do
   configMaybe <- liftEff $ runMaybeT do
-    googleApiKey <- MaybeT $ lookupEnv "GOOGLE_API_KEY"
+    googleApiClientEmail <- MaybeT $ lookupEnv "GOOGLE_API_CLIENT_EMAIL"
+    googleApiPrivateKey' <- MaybeT $ lookupEnv "GOOGLE_API_PRIVATE_KEY"
     spreadsheetId <- MaybeT $ lookupEnv "SPREADSHEET_ID"
-    pure { googleApiKey, spreadsheetId }
+    googleApiPrivateKey <- pure $
+      String.replaceAll (Pattern "\\n") (Replacement "\n") googleApiPrivateKey'
+    pure { googleApiClientEmail, googleApiPrivateKey, spreadsheetId }
   config <- liftEff $ maybe (throw "INVALID ENV") pure configMaybe
-  db <- getGroupList config.googleApiKey config.spreadsheetId
+  db <-
+    getGroupList
+      config.googleApiClientEmail
+      config.googleApiPrivateKey
+      config.spreadsheetId
   context <- makeVar db
   port <- fromMaybe 3000 <$> runMaybeT do
     portString <- MaybeT $ liftEff $ lookupEnv "PORT"

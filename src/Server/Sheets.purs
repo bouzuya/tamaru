@@ -30,9 +30,18 @@ type Range = String
 type Row = Array String
 
 foreign import getRowsImpl
-  :: forall e. Key -> SpreadsheetId -> Range -> Eff e (Promise (Array Row))
+  :: forall e
+  . ClientEmail
+  -> PrivateKey
+  -> SpreadsheetId
+  -> Range
+  -> Eff e (Promise (Array Row))
 foreign import getSheetTitlesImpl
-  :: forall e. Key -> SpreadsheetId -> Eff e (Promise (Array String))
+  :: forall e
+  . ClientEmail
+  -> PrivateKey
+  -> SpreadsheetId
+  -> Eff e (Promise (Array String))
 foreign import setRowsImpl
   :: forall e
   . ClientEmail
@@ -42,26 +51,45 @@ foreign import setRowsImpl
   -> Array Row
   -> Eff e (Promise Unit)
 
-getDataList :: forall e. Key -> SpreadsheetId -> GroupId -> Aff e (Array Data)
-getDataList key spreadsheetId groupId = do
-  let range = groupId <> "!A:B"
-  rows <- liftEff (getRowsImpl key spreadsheetId range) >>= Promise.toAff
+getDataList
+  :: forall e
+  . ClientEmail
+  -> PrivateKey
+  -> SpreadsheetId
+  -> GroupId
+  -> Aff e (Array Data)
+getDataList clientEmail privateKey spreadsheetId groupId = do
+  let
+    range = groupId <> "!A:B"
+    eff = getRowsImpl clientEmail privateKey spreadsheetId range
+  rows <- liftEff eff >>= Promise.toAff
   pure $ catMaybes (toData <$> rows)
   where
     toData [id, value] = Just { id, value }
     toData _ = Nothing
 
-getGroupIdList :: forall e. Key -> SpreadsheetId -> Aff e (Array GroupId)
-getGroupIdList key spreadsheetId = do
-  liftEff (getSheetTitlesImpl key spreadsheetId) >>= Promise.toAff
+getGroupIdList
+  :: forall e
+  . ClientEmail
+  -> PrivateKey
+  -> SpreadsheetId
+  -> Aff e (Array GroupId)
+getGroupIdList clientEmail privateKey spreadsheetId = do
+  let eff = getSheetTitlesImpl clientEmail privateKey spreadsheetId
+  liftEff eff >>= Promise.toAff
 
-getGroupList :: forall e. Key -> SpreadsheetId -> Aff e (Array Group)
-getGroupList key spreadsheetId = do
-  groupIds <- getGroupIdList key spreadsheetId
-  sequence $ (getGroup key spreadsheetId) <$> groupIds
+getGroupList
+  :: forall e
+  . ClientEmail
+  -> PrivateKey
+  -> SpreadsheetId
+  -> Aff e (Array Group)
+getGroupList clientEmail privateKey spreadsheetId = do
+  groupIds <- getGroupIdList clientEmail privateKey spreadsheetId
+  sequence $ (getGroup clientEmail privateKey spreadsheetId) <$> groupIds
   where
-    getGroup k s groupId = do
-      dataList <- getDataList k s groupId
+    getGroup e k s groupId = do
+      dataList <- getDataList e k s groupId
       pure { id: groupId, data: dataList }
 
 addData
