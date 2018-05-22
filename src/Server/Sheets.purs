@@ -11,9 +11,13 @@ import Control.Monad.Eff.Class (liftEff)
 import Control.Promise (Promise)
 import Control.Promise as Promise
 import Data.Array (catMaybes)
+import Data.Array as Array
+import Data.Eq ((==))
 import Data.Function (($))
+import Data.Int as Int
 import Data.Maybe (Maybe(..))
 import Data.Semigroup ((<>))
+import Data.Semiring ((+))
 import Data.Traversable (sequence)
 import Data.Unit (Unit)
 import Server.Model (Data, GroupId, Group)
@@ -59,3 +63,23 @@ getGroupList key spreadsheetId = do
     getGroup k s groupId = do
       dataList <- getDataList k s groupId
       pure { id: groupId, data: dataList }
+
+addData
+  :: forall e
+  . ClientEmail
+  -> PrivateKey
+  -> SpreadsheetId
+  -> Group
+  -> Data
+  -> Aff e Unit
+addData clientEmail privateKey spreadsheetId group { id, value } = do
+  let
+    position =
+      case Array.findIndex (\{ id: id' } -> id == id') group.data of
+        Nothing -> Array.length group.data
+        Just index -> index + 1
+    rowNumber = Int.toStringAs Int.decimal position
+    range = "A" <> rowNumber <> ":" <> "B" <> rowNumber
+    rows = [[id, value]]
+    eff = setRowsImpl clientEmail privateKey spreadsheetId range rows
+  liftEff eff >>= Promise.toAff
