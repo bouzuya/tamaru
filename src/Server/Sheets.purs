@@ -18,6 +18,8 @@ import Data.Traversable (sequence)
 import Data.Unit (Unit)
 import Server.Model (Data, GroupId, Group)
 
+type ClientEmail = String
+type PrivateKey = String
 type Key = String
 type SpreadsheetId = String
 type Range = String
@@ -28,7 +30,13 @@ foreign import getRowsImpl
 foreign import getSheetTitlesImpl
   :: forall e. Key -> SpreadsheetId -> Eff e (Promise (Array String))
 foreign import setRowsImpl
-  :: forall e. String -> Key -> SpreadsheetId -> Range -> Array Row -> Eff e (Promise Unit)
+  :: forall e
+  . ClientEmail
+  -> PrivateKey
+  -> SpreadsheetId
+  -> Range
+  -> Array Row
+  -> Eff e (Promise Unit)
 
 getDataList :: forall e. Key -> SpreadsheetId -> GroupId -> Aff e (Array Data)
 getDataList key spreadsheetId groupId = do

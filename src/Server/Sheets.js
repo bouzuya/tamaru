@@ -10,11 +10,10 @@ exports.getRowsImpl = function (key) {
           var client = google.sheets({ auth: key, version: 'v4' });
           return client.spreadsheets.values.get(
             {
-              dateTimeRenderOption: "SERIAL_NUMBER",
-              majorDimension: "ROWS",
+              majorDimension: 'ROWS',
               range: range,
               spreadsheetId: spreadsheetId,
-              valueRenderOption: "FORMATTED_VALUE"
+              valueRenderOption: 'FORMATTED_VALUE'
             },
             function (error, response) {
               if (error) {
@@ -55,16 +54,16 @@ exports.getSheetTitlesImpl = function (key) {
   };
 };
 
-exports.setRowsImpl = function (email) {
-  return function (key) {
+exports.setRowsImpl = function (clientEmail) {
+  return function (privateKey) {
     return function (spreadsheetId) {
       return function (range) {
         return function (rows) {
           return function () {
             return google.auth.getClient({
               credentials: {
-                client_email: email,
-                private_key: key
+                client_email: clientEmail,
+                private_key: privateKey
               },
               scopes: [
                 'https://www.googleapis.com/auth/drive',
