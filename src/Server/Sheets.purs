@@ -1,6 +1,7 @@
 module Server.Sheets
   ( Key
   , SpreadsheetId
+  , addData
   , getGroupList
   ) where
 
@@ -99,7 +100,7 @@ addData
   -> SpreadsheetId
   -> Group
   -> Data
-  -> Aff e Unit
+  -> Aff e Data
 addData clientEmail privateKey spreadsheetId group { id, value } = do
   let
     position =
@@ -110,4 +111,5 @@ addData clientEmail privateKey spreadsheetId group { id, value } = do
     range = "A" <> rowNumber <> ":" <> "B" <> rowNumber
     rows = [[id, value]]
     eff = setRowsImpl clientEmail privateKey spreadsheetId range rows
-  liftEff eff >>= Promise.toAff
+  _ <- liftEff eff >>= Promise.toAff
+  pure { id, value }

@@ -9,10 +9,14 @@ import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.Server.Node (ServerEff)
 import Control.Monad.Aff (Aff)
+import Data.Argonaut (decodeJson, jsonParser)
+import Data.Either (either)
 import Data.Maybe (Maybe(..))
-import Prelude (class Show, bind, pure, ($), (<>))
+import Data.StrMap as StrMap
+import Prelude (class Show, bind, const, pure, ($), (<>), (=<<))
 import Server.DB (Context, findDataAllByGroupId, findDataByGroupIdAndDataId, findGroupAll, findGroupById)
 import Server.Response (response200, response404)
+import Server.Sheets (addData)
 import Server.View (View(..))
 
 type GroupIdLike = String
@@ -59,6 +63,24 @@ handleAction context (GetGroupDataList groupId) _ = do
     Just allData -> do
       view <- pure $ DataListView allData
       pure $ response200 view
+handleAction context (CreateGroupData groupId) { body } = do
+  paramsMaybe <- pure do
+    m <- either (const Nothing) Just $ decodeJson =<< jsonParser body
+    id <- StrMap.lookup "id" m
+    value <- StrMap.lookup "value" m
+    pure { id, value }
+  case paramsMaybe of
+    Nothing ->
+      pure response404 -- TODO: response400
+    Just params -> do
+      groupMaybe <- findGroupById context groupId
+      case groupMaybe of
+        Nothing ->
+          pure response404
+        Just group -> do
+          d <- addData "" "" "" group params -- FIXME
+          view <- pure $ DataView d
+          pure $ response200 view
 handleAction context (GetGroupData groupId dataId) _ = do
   dataMaybe <- findDataByGroupIdAndDataId context groupId dataId
   case dataMaybe of
