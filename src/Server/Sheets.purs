@@ -105,7 +105,7 @@ addData clientEmail privateKey spreadsheetId group { id, value } = do
   let
     position =
       case Array.findIndex (\{ id: id' } -> id == id') group.data of
-        Nothing -> Array.length group.data
+        Nothing -> (Array.length group.data) + 1
         Just index -> index + 1
     rowNumber = Int.toStringAs Int.decimal position
     range = "A" <> rowNumber <> ":" <> "B" <> rowNumber
