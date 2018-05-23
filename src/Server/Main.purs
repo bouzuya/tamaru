@@ -24,12 +24,6 @@ import Server.Response (response302, response404)
 import Server.Route (route)
 import Server.Sheets (getGroupList)
 
-type Config =
-  { googleApiClientEmail :: String
-  , googleApiPrivateKey :: String
-  , spreadsheetId :: String
-  }
-
 onRequest
   :: forall e
   . Context
@@ -70,7 +64,7 @@ main = launchAff_ do
       config.googleApiClientEmail
       config.googleApiPrivateKey
       config.spreadsheetId
-  context <- makeVar db
+  context <- makeVar { config, db }
   port <- fromMaybe 3000 <$> runMaybeT do
     portString <- MaybeT $ liftEff $ lookupEnv "PORT"
     MaybeT $ liftEff $ pure $ Int.fromString portString

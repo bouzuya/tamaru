@@ -9,6 +9,7 @@ import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.Server.Node (ServerEff)
 import Control.Monad.Aff (Aff)
+import Control.Monad.Aff.AVar (readVar)
 import Data.Argonaut (decodeJson, jsonParser)
 import Data.Either (either)
 import Data.Maybe (Maybe(..))
@@ -78,7 +79,18 @@ handleAction context (CreateGroupData groupId) { body } = do
         Nothing ->
           pure response404
         Just group -> do
-          d <- addData "" "" "" group params -- FIXME
+          { config:
+            { googleApiClientEmail
+            , googleApiPrivateKey
+            , spreadsheetId
+            }
+          } <- readVar context
+          d <- addData
+            googleApiClientEmail
+            googleApiPrivateKey
+            spreadsheetId
+            group
+            params
           view <- pure $ DataView d
           pure $ response200 view
 handleAction context (GetGroupData groupId dataId) _ = do
