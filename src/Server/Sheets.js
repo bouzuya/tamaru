@@ -119,7 +119,7 @@ exports.setRowsImpl = function (clientEmail) {
                       },
                       responseValueRenderOption: 'FORMATTED_VALUE',
                       spreadsheetId: spreadsheetId,
-                      valueInputOption: 'RAW'
+                      valueInputOption: 'USER_ENTERED'
                     },
                     function (error, response) {
                       if (error) {
