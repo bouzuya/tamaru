@@ -9,15 +9,14 @@ import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.Server.Node (ServerEff)
 import Control.Monad.Aff (Aff)
-import Control.Monad.Aff.AVar (readVar)
+import Control.Monad.Eff.Ref (REF)
 import Data.Argonaut (decodeJson, jsonParser)
 import Data.Either (either)
 import Data.Maybe (Maybe(..))
 import Data.StrMap as StrMap
 import Prelude (class Show, bind, const, pure, ($), (<>), (=<<))
-import Server.DB (Context, findDataAllByGroupId, findDataByGroupIdAndDataId, findGroupAll, findGroupById)
+import Server.DB (Context, addData, findDataAllByGroupId, findDataByGroupIdAndDataId, findGroupAll, findGroupById)
 import Server.Response (response200, response404)
-import Server.Sheets (addData)
 import Server.View (View(..))
 
 type GroupIdLike = String
@@ -43,7 +42,7 @@ instance showAction :: Show Action where
   show (UpdateGroupData groupId dataId)
     = "UpdateGroupData(" <> groupId <> "," <> dataId <> ")"
 
-handleAction :: forall e. Context -> Action -> Request -> Aff (ServerEff e) Response
+handleAction :: forall e. Context -> Action -> Request -> Aff (ServerEff (ref :: REF | e)) Response
 handleAction context GetGroupList _ = do
   groups <- findGroupAll context
   view <- pure $ GroupListView groups
@@ -79,20 +78,13 @@ handleAction context (CreateGroupData groupId) { body } = do
         Nothing ->
           pure response404
         Just group -> do
-          { config:
-            { googleApiClientEmail
-            , googleApiPrivateKey
-            , spreadsheetId
-            }
-          } <- readVar context
-          d <- addData
-            googleApiClientEmail
-            googleApiPrivateKey
-            spreadsheetId
-            group
-            params
-          view <- pure $ DataView d
-          pure $ response200 view
+          updatedMaybe <- addData context group.id params
+          case updatedMaybe of
+            Nothing ->
+              pure response404 -- TODO: repsonse5xx
+            Just d -> do
+              view <- pure $ DataView d
+              pure $ response200 view
 handleAction context (GetGroupData groupId dataId) _ = do
   dataMaybe <- findDataByGroupIdAndDataId context groupId dataId
   case dataMaybe of

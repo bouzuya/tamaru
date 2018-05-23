@@ -9,6 +9,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Exception (EXCEPTION, throw)
+import Control.Monad.Eff.Ref (REF, newRef)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import Data.Either (Either(..))
 import Data.Int as Int
@@ -28,7 +29,7 @@ onRequest
   :: forall e
   . Context
   -> Request
-  -> Aff (ServerEff e) Response
+  -> Aff (ServerEff (ref :: REF | e)) Response
 onRequest context request@{ method, pathname } = do
   case parsePath' pathname of
     Left location ->
@@ -47,7 +48,11 @@ main
   :: forall e
   . Eff
     (ServerEff
-      (console :: CONSOLE, exception :: EXCEPTION, process :: PROCESS | e)
+      ( console :: CONSOLE
+      , exception :: EXCEPTION
+      , process :: PROCESS
+      , ref :: REF
+      | e)
     )
     Unit
 main = launchAff_ do
@@ -64,7 +69,7 @@ main = launchAff_ do
       config.googleApiClientEmail
       config.googleApiPrivateKey
       config.spreadsheetId
-  context <- makeVar { config, db }
+  context <- liftEff $ newRef { config, db }
   port <- fromMaybe 3000 <$> runMaybeT do
     portString <- MaybeT $ liftEff $ lookupEnv "PORT"
     MaybeT $ liftEff $ pure $ Int.fromString portString

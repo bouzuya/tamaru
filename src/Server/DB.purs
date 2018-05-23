@@ -1,6 +1,7 @@
 module Server.DB
   ( Config
   , Context
+  , addData
   , findDataAllByGroupId
   , findDataByGroupIdAndDataId
   , findGroupAll
@@ -9,31 +10,50 @@ module Server.DB
 
 import Control.Bind (bind, pure, (<$>), (>>=))
 import Control.Monad.Aff (Aff)
-import Control.Monad.Aff.AVar (AVAR, readVar)
-import Control.Monad.Eff.AVar (AVar)
+import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Eff.Ref (REF, Ref, readRef, writeRef)
 import Data.Array as Array
 import Data.Eq ((==))
 import Data.Foldable (find)
 import Data.Function (($))
-import Data.Maybe (Maybe, fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Semigroup ((<>))
 import Server.Model (Data, Group, GroupId, DataId)
+import Server.Sheets (addData) as Sheets
 
 type Config =
   { googleApiClientEmail :: String
   , googleApiPrivateKey :: String
   , spreadsheetId :: String
   }
-type Context = AVar { config :: Config,  db :: (Array Group) }
+type Context = Ref { config :: Config,  db :: (Array Group) }
 
 addData
   :: forall e
   . Context
   -> GroupId
   -> Data
-  -> Aff (avar :: AVAR | e) (Array Group)
+  -> Aff (ref :: REF | e) (Maybe Data)
 addData context groupId d = do
-  { db } <- readVar context
-  pure $ addData' db groupId d
+  { config: config@
+    { googleApiClientEmail
+    , googleApiPrivateKey
+    , spreadsheetId
+    }
+  , db
+  } <- liftEff $ readRef context
+  db' <- pure $ addData' db groupId d
+  _ <- liftEff $ writeRef context ({ config: config, db: db' })
+  case findGroupById' db' groupId of
+    Nothing -> pure Nothing
+    Just group -> do
+      d' <- Sheets.addData
+        googleApiClientEmail
+        googleApiPrivateKey
+        spreadsheetId
+        group
+        d
+      pure $ Just d'
 
 addData' :: Array Group -> GroupId -> Data -> Array Group
 addData' db groupId d = fromMaybe db do
@@ -41,10 +61,12 @@ addData' db groupId d = fromMaybe db do
   Array.modifyAt
     index
     (\g@{ id: groupId', data: groupData } ->
-      fromMaybe g do
-        index' <- Array.findIndex (\{ id } -> id == d.id) groupData
-        newData <- Array.modifyAt index' (\d' -> d') groupData
-        pure { id: groupId', data: newData }
+      case Array.findIndex (\{ id } -> id == d.id) groupData of
+        Nothing -> { id: groupId', data: groupData <> [d] }
+        Just index' -> do
+          case Array.modifyAt index' (_ { value = d.value }) groupData of
+            Nothing -> g
+            Just newData -> { id: groupId', data: newData }
     )
     db
 
@@ -52,9 +74,9 @@ findDataAllByGroupId
   :: forall e
   . Context
   -> GroupId
-  -> Aff (avar :: AVAR | e) (Maybe (Array Data))
+  -> Aff (ref :: REF | e) (Maybe (Array Data))
 findDataAllByGroupId context groupId = do
-  { db } <- readVar context
+  { db } <- liftEff $ readRef context
   pure $ findDataAllByGroupId' db groupId
 
 findDataAllByGroupId' :: Array Group -> GroupId -> Maybe (Array Data)
@@ -65,9 +87,9 @@ findDataByGroupIdAndDataId
   . Context
   -> GroupId
   -> DataId
-  -> Aff (avar :: AVAR | e) (Maybe Data)
+  -> Aff (ref :: REF | e) (Maybe Data)
 findDataByGroupIdAndDataId context groupId dataId = do
-  { db } <- readVar context
+  { db } <- liftEff $ readRef context
   pure $ findDataByGroupIdAndDataId' db groupId dataId
 
 findDataByGroupIdAndDataId' :: Array Group -> GroupId -> DataId -> Maybe Data
@@ -77,9 +99,9 @@ findDataByGroupIdAndDataId' d groupId dataId =
 findGroupAll
   :: forall e
   . Context
-  -> Aff (avar :: AVAR | e) (Array Group)
+  -> Aff (ref :: REF | e) (Array Group)
 findGroupAll context = do
-  { db } <- readVar context
+  { db } <- liftEff $ readRef context
   pure $ findGroupAll' db
 
 findGroupAll' :: Array Group -> Array Group
@@ -89,9 +111,9 @@ findGroupById
   :: forall e
   . Context
   -> GroupId
-  -> Aff (avar :: AVAR | e) (Maybe Group)
+  -> Aff (ref :: REF | e) (Maybe Group)
 findGroupById context groupId = do
-  { db } <- readVar context
+  { db } <- liftEff $ readRef context
   pure $ findGroupById' db groupId
 
 findGroupById' :: Array Group -> GroupId -> Maybe Group
