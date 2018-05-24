@@ -7,11 +7,17 @@ import Data.Maybe (Maybe(..))
 import Server.Action (Action(..))
 
 route :: Method -> Array String -> Maybe Action
-route GET [] = Just GetIndex
-route GET ["groups"] = Just GetGroupList
-route GET ["groups", groupId] = Just (GetGroup groupId)
-route GET ["groups", groupId, "data"] = Just (GetGroupDataList groupId)
-route PUT ["groups", groupId, "data"] = Just (UpdateGroupData groupId)
-route GET ["groups", groupId, "data", dataId]
-  = Just (GetGroupData groupId dataId)
-route _ _ = Nothing
+route GET [] =
+  Just GetIndex
+route GET ["groups"] =
+  Just GetGroupList
+route GET ["groups", groupId] =
+  Just (GetGroup groupId)
+route GET ["groups", groupId, "data"] =
+  Just (GetGroupDataList groupId)
+route PUT ["groups", groupId, "data"] =
+  Just (UpdateGroupData groupId)
+route GET ["groups", groupId, "data", dataId] =
+  Just (GetGroupData groupId dataId)
+route _ _ =
+  Nothing
