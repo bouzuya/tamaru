@@ -16,7 +16,7 @@ import Data.Maybe (Maybe(..))
 import Data.StrMap as StrMap
 import Prelude (class Show, bind, const, pure, ($), (<>), (=<<))
 import Server.DB (Context, addData, findDataAllByGroupId, findDataByGroupIdAndDataId, findGroupAll, findGroupById)
-import Server.Response (response200, response404)
+import Server.Response (response200, response400, response404, response500)
 import Server.View (View(..))
 
 type GroupIdLike = String
@@ -68,7 +68,7 @@ handleAction context (UpdateGroupData groupId) { body } = do
     pure { id, value }
   case paramsMaybe of
     Nothing ->
-      pure response404 -- TODO: response400
+      pure response400
     Just params -> do
       groupMaybe <- findGroupById context groupId
       case groupMaybe of
@@ -78,7 +78,7 @@ handleAction context (UpdateGroupData groupId) { body } = do
           updatedMaybe <- addData context group.id params
           case updatedMaybe of
             Nothing ->
-              pure response404 -- TODO: repsonse5xx
+              pure response500
             Just d -> do
               view <- pure $ DataView d
               pure $ response200 view
