@@ -4,7 +4,6 @@ import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.Server.Node (ServerEff, run)
 import Control.Monad.Aff (Aff, launchAff_)
-import Control.Monad.Aff.AVar (makeVar)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
@@ -57,9 +56,9 @@ main
     Unit
 main = launchAff_ do
   configMaybe <- liftEff $ runMaybeT do
-    googleApiClientEmail <- MaybeT $ lookupEnv "GOOGLE_API_CLIENT_EMAIL"
-    googleApiPrivateKey' <- MaybeT $ lookupEnv "GOOGLE_API_PRIVATE_KEY"
-    spreadsheetId <- MaybeT $ lookupEnv "SPREADSHEET_ID"
+    googleApiClientEmail <- MaybeT $ lookupEnv "TAMARU_GOOGLE_API_CLIENT_EMAIL"
+    googleApiPrivateKey' <- MaybeT $ lookupEnv "TAMARU_GOOGLE_API_PRIVATE_KEY"
+    spreadsheetId <- MaybeT $ lookupEnv "TAMARU_SPREADSHEET_ID"
     googleApiPrivateKey <- pure $
       String.replaceAll (Pattern "\\n") (Replacement "\n") googleApiPrivateKey'
     pure { googleApiClientEmail, googleApiPrivateKey, spreadsheetId }
