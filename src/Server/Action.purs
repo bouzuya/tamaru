@@ -27,20 +27,17 @@ data Action
   | GetGroupList
   | GetGroup GroupIdLike
   | GetGroupDataList GroupIdLike
-  | CreateGroupData GroupIdLike
+  | UpdateGroupData GroupIdLike
   | GetGroupData GroupIdLike DataIdLike
-  | UpdateGroupData GroupIdLike DataIdLike
 
 instance showAction :: Show Action where
   show GetIndex = "GetIndex"
   show GetGroupList = "GetGroupList"
   show (GetGroup groupId) = "GetGroup(" <> groupId <> ")"
   show (GetGroupDataList groupId) = "GetGroupDataList(" <> groupId <> ")"
-  show (CreateGroupData groupId) = "CreateGroupData(" <> groupId <> ")"
+  show (UpdateGroupData groupId) = "UpdateGroupData(" <> groupId <> ")"
   show (GetGroupData groupId dataId)
     = "GetGroupData(" <> groupId <> "," <> dataId <> ")"
-  show (UpdateGroupData groupId dataId)
-    = "UpdateGroupData(" <> groupId <> "," <> dataId <> ")"
 
 handleAction :: forall e. Context -> Action -> Request -> Aff (ServerEff (ref :: REF | e)) Response
 handleAction context GetGroupList _ = do
@@ -63,7 +60,7 @@ handleAction context (GetGroupDataList groupId) _ = do
     Just allData -> do
       view <- pure $ DataListView allData
       pure $ response200 view
-handleAction context (CreateGroupData groupId) { body } = do
+handleAction context (UpdateGroupData groupId) { body } = do
   paramsMaybe <- pure do
     m <- either (const Nothing) Just $ decodeJson =<< jsonParser body
     id <- StrMap.lookup "id" m
