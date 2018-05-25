@@ -40,6 +40,9 @@ instance showAction :: Show Action where
     = "GetGroupData(" <> groupId <> "," <> dataId <> ")"
 
 handleAction :: forall e. Context -> Action -> Request -> Aff (ServerEff (ref :: REF | e)) Response
+handleAction context GetIndex _ = do
+  view <- pure IndexView
+  pure $ response200 view
 handleAction context GetGroupList _ = do
   groups <- findGroupAll context
   view <- pure $ GroupListView groups
@@ -90,6 +93,3 @@ handleAction context (GetGroupData groupId dataId) _ = do
     Just d -> do
       view <- pure $ DataView d
       pure $ response200 view
-handleAction _ action request = do
-  view <- pure $ RequestView request
-  pure $ response200 view
