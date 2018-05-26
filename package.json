@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "bower": "^1.8.4",
+    "mkdirp": "^0.5.1",
     "nodemon": "^1.17.4",
     "npm-run-all": "^4.1.2",
     "pulp": "^12.2.0",
@@ -27,7 +28,10 @@
   },
   "scripts": {
     "bower:install": "bower install",
-    "build": "npm-run-all -s build:server",
+    "build": "npm-run-all -p 'build:*'",
+    "build:client": "npm-run-all -s 'watch:client:dir' 'watch:client:scripts'",
+    "build:client:dir": "mkdirp public/scripts",
+    "build:client:scripts": "pulp browserify --main Client.Main --optimise --to public/scripts/index.js",
     "build:server": "pulp build --main Server.Main",
     "clean": "rimraf .pulp-cache output",
     "prepare": "npm-run-all -s bower:install clean build",
@@ -35,6 +39,9 @@
     "start": "node --eval \"require('./output/Server.Main').main();\"",
     "test": "pulp test",
     "watch": "npm-run-all -p 'watch:*'",
+    "watch:client": "npm-run-all -s 'watch:client:dir' 'watch:client:scripts'",
+    "watch:client:dir": "mkdirp public/scripts",
+    "watch:client:scripts": "pulp --watch browserify --main Client.Main --optimise --to public/scripts/index.js",
     "watch:server": "pulp --watch build --main Server.Main",
     "watch:start": "nodemon --watch output --exec 'npm start'"
   }
