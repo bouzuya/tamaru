@@ -1,9 +1,13 @@
 module Client.Main (main) where
 
+import Client.Component.App (app)
+import Control.Bind (bind)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log)
-import Data.Unit (Unit)
+import Data.Unit (Unit, unit)
+import Halogen.Aff as HA
+import Halogen.VDom.Driver (runUI)
 
-main :: forall e. Eff (console :: CONSOLE | e) Unit
-main = do
-  log "Hello"
+main :: Eff (HA.HalogenEffects ()) Unit
+main = HA.runHalogenAff do
+  body <- HA.awaitBody
+  runUI app unit body
