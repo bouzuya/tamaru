@@ -29,7 +29,7 @@
   "scripts": {
     "bower:install": "bower install",
     "build": "npm-run-all -p 'build:*'",
-    "build:client": "npm-run-all -s 'watch:client:dir' 'watch:client:scripts'",
+    "build:client": "npm-run-all -s 'build:client:dir' 'build:client:scripts'",
     "build:client:dir": "mkdirp public/scripts",
     "build:client:scripts": "pulp browserify --main Client.Main --optimise --to public/scripts/index.js",
     "build:server": "pulp build --main Server.Main",
