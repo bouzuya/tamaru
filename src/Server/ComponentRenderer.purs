@@ -1,7 +1,62 @@
-module Server.ComponentRenderer (render) where
+module Server.ComponentRenderer (renderAsString) where
 
+import Client.Component.App (app)
+import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
-import Prelude (pure)
+import Control.Monad.Eff.Ref (Ref, newRef)
+import Data.Maybe (Maybe)
+import Halogen as H
+import Halogen.Aff as HA
+import Halogen.Aff.Driver as HAD
+import Halogen.Aff.Driver.State as HADS
+import Halogen.HTML as HH
+import Halogen.Query.InputF as HQI
+import Halogen.VDom as HV
+import Halogen.VDom.DOM.Prop as HVDP
+import Prelude (Unit, bind, const, id, pure, unit, ($))
+import Unsafe.Coerce (unsafeCoerce)
 
-render :: forall e. Eff e String
-render = pure ""
+type Child f g p e =
+  H.ComponentSlot HH.HTML g (Aff (HA.HalogenEffects e)) p (f Unit)
+
+type ChildRenderer f g p e =
+  Child f g p e
+  -> Eff (HA.HalogenEffects e) (HADS.RenderStateX RenderState e)
+
+type QueryHandler f e =
+  (forall x. HQI.InputF x (f x) -> Eff (HA.HalogenEffects e) Unit)
+
+type VHTML f g p e =
+  HV.VDom (Array (HVDP.Prop (HQI.InputF Unit (f Unit)))) (Child f g p e)
+
+newtype RenderState s f g p o e =
+  RenderState
+    { machine :: HV.Step (Eff (HA.HalogenEffects e)) (VHTML f g p e) Unit
+    , renderChildRef :: Ref (ChildRenderer f g p e)
+    }
+
+renderAsString :: forall e. Aff (HA.HalogenEffects e) String
+renderAsString = do
+  _ <- HAD.runUI renderSpec app unit
+  pure "" -- FIXME
+
+renderSpec :: forall e. HAD.RenderSpec HH.HTML RenderState e
+renderSpec =
+  { render
+  , renderChild: id
+  , removeChild: const (pure unit)
+  }
+
+render
+  :: forall s f g p o e
+  . QueryHandler f e
+  -> ChildRenderer f g p e
+  -> HH.HTML (Child f g p e) (f Unit)
+  -> Maybe (RenderState s f g p o e)
+  -> Eff (HA.HalogenEffects e) (RenderState s f g p o e)
+render _ child (HH.HTML vdom) _ = do
+  renderChildRef <- newRef child
+  pure $ RenderState
+    { machine: unsafeCoerce unit -- FIXME
+    , renderChildRef
+    }
