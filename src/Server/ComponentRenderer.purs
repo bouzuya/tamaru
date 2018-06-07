@@ -1,6 +1,5 @@
 module Server.ComponentRenderer (renderAsString) where
 
-import Client.Component.App (app)
 import Control.Monad.Aff (Aff, runAff_)
 import Control.Monad.Aff.AVar (AVar, makeEmptyVar, putVar, readVar)
 import Control.Monad.Eff (Eff)
@@ -37,10 +36,13 @@ newtype RenderState s f g p o e =
     , renderChildRef :: Ref (ChildRenderer f g p e)
     }
 
-renderAsString :: forall e. Aff (HA.HalogenEffects e) String
-renderAsString = do
+renderAsString
+  :: forall e f o
+  . H.Component HH.HTML f Unit o (Aff (HA.HalogenEffects e))
+  -> Aff (HA.HalogenEffects e) String
+renderAsString component = do
   var <- makeEmptyVar
-  _ <- HAD.runUI (renderSpec var) app unit
+  _ <- HAD.runUI (renderSpec var) component unit
   readVar var
 
 renderSpec :: forall e. AVar String -> HAD.RenderSpec HH.HTML RenderState e
