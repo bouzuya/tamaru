@@ -35,6 +35,7 @@
     "build:server": "pulp build --main Server.Main",
     "clean": "rimraf .pulp-cache output",
     "prepare": "npm-run-all -s bower:install clean build",
+    "pulp": "pulp",
     "repl": "pulp repl",
     "start": "node --eval \"require('./output/Server.Main').main();\"",
     "test": "pulp test",
