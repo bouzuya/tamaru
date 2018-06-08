@@ -1,13 +1,15 @@
 module Test.Main (main) where
 
 import Client.Component.App (app)
+import Client.Component.GroupList (groupList)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.AVar (AVAR)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
 import DOM (DOM)
-import Prelude (Unit, bind, (<>))
+import Data.Foldable (intercalate)
+import Prelude (Unit, bind, discard, unit)
 import Server.ComponentRenderer (renderAsString)
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
@@ -29,15 +31,36 @@ main
 main = runTest do
   suite "ComponentRenderer" do
     test "app" do
-      s <- renderAsString app
+      s <- renderAsString app unit
       Assert.equal
         s
-        ( "<html>"
-        <> "<head><title>tamaru</title></head>"
-        <> "<body>"
-        <> "<header><h1>tamaru</h1></header>"
-        <> "<div class=\"body\"><p>body</p></div>"
-        <> "<footer>bouzuya</footer>"
-        <> "</body>"
-        <> "</html>"
+        (intercalate ""
+          [ "<html>"
+          , "<head><title>tamaru</title></head>"
+          , "<body>"
+          , "<header><h1>tamaru</h1></header>"
+          , "<div class=\"body\"><p>body</p></div>"
+          , "<footer>bouzuya</footer>"
+          , "</body>"
+          , "</html>"
+          ]
+        )
+    test "groupList (empty)" do
+      s <- renderAsString groupList { groupList: [] }
+      Assert.equal
+        s
+        (intercalate ""
+          [ "<select class=\"group-list\">"
+          , "</select>"
+          ]
+        )
+    test "groupList (not empty)" do
+      s <- renderAsString groupList { groupList: [{ id: "1", data: [] }] }
+      Assert.equal
+        s
+        (intercalate ""
+          [ "<select class=\"group-list\">"
+          , "<option class=\"group-list-item\">1</option>"
+          , "</select>"
+          ]
         )

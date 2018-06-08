@@ -37,12 +37,13 @@ newtype RenderState s f g p o e =
     }
 
 renderAsString
-  :: forall e f o
-  . H.Component HH.HTML f Unit o (Aff (HA.HalogenEffects e))
+  :: forall e f i o
+  . H.Component HH.HTML f i o (Aff (HA.HalogenEffects e))
+  -> i
   -> Aff (HA.HalogenEffects e) String
-renderAsString component = do
+renderAsString component input = do
   var <- makeEmptyVar
-  _ <- HAD.runUI (renderSpec var) component unit
+  _ <- HAD.runUI (renderSpec var) component input
   readVar var
 
 renderSpec :: forall e. AVar String -> HAD.RenderSpec HH.HTML RenderState e
