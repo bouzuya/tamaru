@@ -23,10 +23,10 @@ location = Tuple "Location"
 
 -- Response helpers
 
-response200 :: View -> Response
-response200 view =
+response200 :: String -> View -> Response
+response200 viewType view =
   { body: show view
-  , headers: [contentType "text/plain"]
+  , headers: [contentType viewType]
   , status: status200
   }
 

@@ -15,6 +15,9 @@ import Control.Monad.Aff.AVar (AVAR)
 import Control.Monad.Aff.AVar as AVar
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Eff.Exception (EXCEPTION)
+import Control.Monad.Eff.Ref (REF)
+import DOM (DOM)
 import Data.Array as Array
 import Data.Foldable as Foldable
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
@@ -32,7 +35,15 @@ import Node.Stream as Stream
 import Node.URL as URL
 import Prelude (Unit, bind, map, pure, unit, ($), (<>), (>>>))
 
-type ServerEff e = (avar :: AVAR, buffer :: BUFFER, http :: HTTP.HTTP | e)
+type ServerEff e =
+  ( avar :: AVAR
+  , buffer :: BUFFER
+  , dom :: DOM
+  , exception :: EXCEPTION
+  , http :: HTTP.HTTP
+  , ref :: REF
+  | e
+  )
 type Body = String
 type ServerOptions =
   { hostname :: String
