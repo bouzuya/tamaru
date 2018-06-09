@@ -3,7 +3,6 @@ module Server.View
   ) where
 
 import Bouzuya.HTTP.Request (Request)
-import Data.Argonaut (jsonNull)
 import Data.Argonaut as Json
 import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=))
 import Data.Function (($))
@@ -17,7 +16,7 @@ data View
   | DataView Data
   | GroupListView (Array Group)
   | GroupView Group
-  | IndexView
+  | IndexView String
   | RequestView Request
 
 instance encodeJsonView :: EncodeJson View where
@@ -36,7 +35,7 @@ instance encodeJsonView :: EncodeJson View where
       StrMap.fromFoldable
         [ "id" := x.id
         ]
-  encodeJson IndexView = jsonNull
+  encodeJson (IndexView s) =  encodeJson s
   encodeJson (RequestView r) =
     encodeJson $
       StrMap.fromFoldable
@@ -47,5 +46,5 @@ instance encodeJsonView :: EncodeJson View where
         ]
 
 instance showView :: Show View where
-  show IndexView = ""
+  show (IndexView s) = s
   show view = Json.stringify $ encodeJson view

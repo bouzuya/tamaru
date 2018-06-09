@@ -41,7 +41,7 @@ instance showAction :: Show Action where
 
 handleAction :: forall e. Context -> Action -> Request -> Aff (ServerEff (ref :: REF | e)) Response
 handleAction context GetIndex _ = do
-  view <- pure IndexView
+  view <- pure (IndexView "")
   pure $ response200 view
 handleAction context GetGroupList _ = do
   groups <- findGroupAll context
