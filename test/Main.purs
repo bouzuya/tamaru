@@ -60,7 +60,7 @@ main = runTest do
         s
         (intercalate ""
           [ "<select class=\"group-list\">"
-          , "<option class=\"group-list-item\">1</option>"
+          , "<option class=\"group-list-item\" selected value=\"1\">1</option>"
           , "</select>"
           ]
         )

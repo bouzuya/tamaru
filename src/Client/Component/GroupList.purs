@@ -5,39 +5,55 @@ module Client.Component.GroupList
   , groupList
   ) where
 
+import Data.Foldable (find)
 import Data.Maybe (Maybe(..))
 import Halogen (ClassName(..))
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Prelude (type (~>), Void, const, id, map, pure)
-import Server.Model (Group)
+import Prelude (type (~>), bind, const, discard, eq, map, pure)
+import Server.Model (Group, GroupId)
 
-type State = { groupList :: Array Group }
-data Query a = Noop a
+type State = { groupList :: Array Group, selected :: Maybe GroupId }
+data Query a
+  = Select String a
 type Input = { groupList :: Array Group }
-type Output = Void
+data Output
+  = Selected String
 
 groupList :: forall m. H.Component HH.HTML Query Input Output m
 groupList =
   H.component
-    { initialState: id
+    { initialState: (\i -> { groupList: i.groupList, selected: Nothing })
     , render
     , eval
     , receiver: const Nothing
     }
   where
   eval :: Query ~> (H.ComponentDSL State Query Output m)
-  eval (Noop a) = pure a
+  eval (Select value next) = do
+    s <- H.get
+    case find (\({ id }) -> eq id value) s.groupList of
+      Nothing -> pure next
+      Just group -> do
+        H.modify \s -> s { selected = Just group.id }
+        H.raise (Selected group.id)
+        pure next
 
   render :: State -> H.ComponentHTML Query
   render state =
     HH.select
-    [ HP.classes [ ClassName "group-list" ] ]
+    [ HP.classes [ ClassName "group-list" ]
+    , HE.onValueChange (HE.input Select)
+    ]
     ( map
       (\group ->
         HH.option
-        [ HP.classes [ ClassName "group-list-item" ] ]
+        [ HP.classes [ ClassName "group-list-item" ]
+        , HP.selected (eq (Just group.id) state.selected)
+        , HP.value group.id
+        ]
         [ HH.text group.id ]
       )
       state.groupList
