@@ -1,16 +1,16 @@
-module Server.ComponentRenderer (renderAsString) where
+module Bouzuya.Halogen.StringRenderer (render) where
 
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.VDom.DOM.StringRenderer as VSR
 import Prelude (Unit)
 
-renderAsString
+render
   :: forall f i o m
   . H.Component HH.HTML f i o m
   -> i
   -> String
-renderAsString = componentToString
+render = componentToString
 
 componentToString
   :: forall f i o m

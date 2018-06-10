@@ -1,5 +1,6 @@
 module Test.Main (main) where
 
+import Bouzuya.Halogen.StringRenderer (render)
 import Client.Component.App (app)
 import Client.Component.GroupList (groupList)
 import Control.Monad.Eff (Eff)
@@ -10,7 +11,6 @@ import Control.Monad.Eff.Ref (REF)
 import DOM (DOM)
 import Data.Foldable (intercalate)
 import Prelude (Unit, discard, unit)
-import Server.ComponentRenderer (renderAsString)
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
 import Test.Unit.Console (TESTOUTPUT)
@@ -29,7 +29,7 @@ main
     )
     Unit
 main = runTest do
-  suite "ComponentRenderer" do
+  suite "Bouzuya.Halogen.StringRenderer" do
     test "app" do
       Assert.equal
         (intercalate ""
@@ -46,7 +46,7 @@ main = runTest do
           , "</html>"
           ]
         )
-        (renderAsString app unit)
+        (render app unit)
     test "groupList (empty)" do
       Assert.equal
         (intercalate ""
@@ -54,7 +54,7 @@ main = runTest do
           , "</select>"
           ]
         )
-        (renderAsString groupList { groupList: [] })
+        (render groupList { groupList: [] })
     test "groupList (not empty)" do
       Assert.equal
         (intercalate ""
@@ -63,4 +63,4 @@ main = runTest do
           , "</select>"
           ]
         )
-        (renderAsString groupList { groupList: [{ id: "1", data: [] }] })
+        (render groupList { groupList: [{ id: "1", data: [] }] })

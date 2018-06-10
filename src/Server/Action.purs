@@ -5,6 +5,7 @@ module Server.Action
   , handleAction
   ) where
 
+import Bouzuya.Halogen.StringRenderer (render)
 import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.Server.Node (ServerEff)
@@ -16,7 +17,6 @@ import Data.Either (either)
 import Data.Maybe (Maybe(..))
 import Data.StrMap as StrMap
 import Prelude (class Show, bind, const, pure, unit, ($), (<>), (=<<))
-import Server.ComponentRenderer (renderAsString)
 import Server.DB (Context, addData, findDataAllByGroupId, findDataByGroupIdAndDataId, findGroupAll, findGroupById)
 import Server.Response (response200, response400, response404, response500)
 import Server.View (View(..))
@@ -48,7 +48,7 @@ handleAction
   -> Request
   -> Aff (ServerEff (ref :: REF | e)) Response
 handleAction context GetIndex _ = do
-  view <- pure (IndexView (renderAsString app unit))
+  view <- pure (IndexView (render app unit))
   pure $ response200 "text/html" view
 handleAction context GetGroupList _ = do
   groups <- findGroupAll context
