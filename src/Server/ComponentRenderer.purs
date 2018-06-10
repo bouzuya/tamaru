@@ -1,28 +1,24 @@
 module Server.ComponentRenderer (renderAsString) where
 
-import Control.Monad.Aff (Aff)
-import Halogen (unComponent, unComponentSlot)
 import Halogen as H
-import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.VDom.DOM.StringRenderer as VSR
-import Prelude (Unit, pure)
+import Prelude (Unit)
 
 renderAsString
-  :: forall e f i o
-  . H.Component HH.HTML f i o (Aff (HA.HalogenEffects e))
+  :: forall f i o m
+  . H.Component HH.HTML f i o m
   -> i
-  -> Aff (HA.HalogenEffects e) String
-renderAsString component input = do
-  pure (componentToString component input)
+  -> String
+renderAsString = componentToString
 
 componentToString
-  :: forall e f i o
-  . H.Component HH.HTML f i o (Aff (HA.HalogenEffects e))
+  :: forall f i o m
+  . H.Component HH.HTML f i o m
   -> i
   -> String
 componentToString component input =
-  unComponent
+  H.unComponent
     (\{ initialState, render } ->
       let (HH.HTML vdom) = render (initialState input) in
       VSR.render componentSlotToString vdom
@@ -30,10 +26,10 @@ componentToString component input =
     component
 
 componentSlotToString
-  :: forall e f g p
-  . H.ComponentSlot HH.HTML g (Aff (HA.HalogenEffects e)) p (f Unit)
+  :: forall f g m p
+  . H.ComponentSlot HH.HTML g m p (f Unit)
   -> String
 componentSlotToString slot =
-  unComponentSlot
+  H.unComponentSlot
     (\_ component input _ _ _ -> componentToString component input)
     slot

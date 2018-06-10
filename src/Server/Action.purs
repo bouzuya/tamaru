@@ -48,8 +48,7 @@ handleAction
   -> Request
   -> Aff (ServerEff (ref :: REF | e)) Response
 handleAction context GetIndex _ = do
-  s <- renderAsString app unit
-  view <- pure (IndexView s)
+  view <- pure (IndexView (renderAsString app unit))
   pure $ response200 "text/html" view
 handleAction context GetGroupList _ = do
   groups <- findGroupAll context

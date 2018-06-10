@@ -9,7 +9,7 @@ import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
 import DOM (DOM)
 import Data.Foldable (intercalate)
-import Prelude (Unit, bind, discard, unit)
+import Prelude (Unit, discard, unit)
 import Server.ComponentRenderer (renderAsString)
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
@@ -31,7 +31,6 @@ main
 main = runTest do
   suite "ComponentRenderer" do
     test "app" do
-      s <- renderAsString app unit
       Assert.equal
         (intercalate ""
           [ "<html>"
@@ -47,18 +46,16 @@ main = runTest do
           , "</html>"
           ]
         )
-        s
+        (renderAsString app unit)
     test "groupList (empty)" do
-      s <- renderAsString groupList { groupList: [] }
       Assert.equal
         (intercalate ""
           [ "<select class=\"group-list\">"
           , "</select>"
           ]
         )
-        s
+        (renderAsString groupList { groupList: [] })
     test "groupList (not empty)" do
-      s <- renderAsString groupList { groupList: [{ id: "1", data: [] }] }
       Assert.equal
         (intercalate ""
           [ "<select class=\"group-list\">"
@@ -66,4 +63,4 @@ main = runTest do
           , "</select>"
           ]
         )
-        s
+        (renderAsString groupList { groupList: [{ id: "1", data: [] }] })
