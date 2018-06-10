@@ -33,34 +33,37 @@ main = runTest do
     test "app" do
       s <- renderAsString app unit
       Assert.equal
-        s
         (intercalate ""
           [ "<html>"
           , "<head><title>tamaru</title></head>"
           , "<body>"
           , "<header><h1>tamaru</h1></header>"
-          , "<div class=\"body\"><p>body</p></div>"
+          , "<div class=\"body\">"
+          , "<p>body</p>"
+          , "<select class=\"group-list\"></select>"
+          , "</div>"
           , "<footer>bouzuya</footer>"
           , "</body>"
           , "</html>"
           ]
         )
+        s
     test "groupList (empty)" do
       s <- renderAsString groupList { groupList: [] }
       Assert.equal
-        s
         (intercalate ""
           [ "<select class=\"group-list\">"
           , "</select>"
           ]
         )
+        s
     test "groupList (not empty)" do
       s <- renderAsString groupList { groupList: [{ id: "1", data: [] }] }
       Assert.equal
-        s
         (intercalate ""
           [ "<select class=\"group-list\">"
           , "<option class=\"group-list-item\" selected value=\"1\">1</option>"
           , "</select>"
           ]
         )
+        s
