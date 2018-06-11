@@ -5,22 +5,26 @@ module Client.Component.App
   , app
   ) where
 
+import Client.Component.DataList as DataList
 import Client.Component.GroupList as GroupList
+import Data.Either.Nested (Either2)
+import Data.Functor.Coproduct.Nested (Coproduct2)
 import Data.Maybe (Maybe(..))
 import Halogen (ClassName(..))
 import Halogen as H
+import Halogen.Component.ChildPath as CP
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Prelude (class Eq, class Ord, type (~>), Unit, Void, const, pure, unit)
+import Prelude (type (~>), Unit, Void, const, pure, unit)
 
-data Slot = GroupListSlot
-derive instance eqGroupListSlot :: Eq Slot
-derive instance ordGroupListSlot :: Ord Slot
+type ChildQuery = Coproduct2 GroupList.Query DataList.Query
+type ChildSlot = Either2 Unit Unit
 
 type State = Unit
 data Query a
-  = HandleGroupList GroupList.Output a
+  = HandleDataList DataList.Output a
+  | HandleGroupList GroupList.Output a
   | Noop a
 type Input = Unit -- input value
 type Output = Void -- output message
@@ -34,11 +38,12 @@ app =
     , receiver: const Nothing
     }
   where
-  eval :: Query ~> H.ParentDSL State Query GroupList.Query Slot Output m
+  eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output m
+  eval (HandleDataList _ a) = pure a
   eval (HandleGroupList _ a) = pure a
   eval (Noop a) = pure a
 
-  render :: State -> H.ParentHTML Query GroupList.Query Slot m
+  render :: State -> H.ParentHTML Query ChildQuery ChildSlot m
   render _ =
     HH.html []
     [ HH.head []
@@ -56,11 +61,18 @@ app =
         ]
         [ HH.p []
           [ HH.text "body" ]
-        , HH.slot
-          GroupListSlot
+        , HH.slot'
+          CP.cp1
+          unit
           GroupList.groupList
           { groupList: [] }
           (HE.input HandleGroupList)
+        , HH.slot'
+          CP.cp2
+          unit
+          DataList.dataList
+          { dataList: [] }
+          (HE.input HandleDataList)
         ]
       , HH.footer []
         [ HH.text "bouzuya"

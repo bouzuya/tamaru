@@ -40,6 +40,7 @@ main = runTest do
           , "<div class=\"body\">"
           , "<p>body</p>"
           , "<select class=\"group-list\"></select>"
+          , "<ul class=\"data-list\"></ul>"
           , "</div>"
           , "<footer>bouzuya</footer>"
           , "</body>"
