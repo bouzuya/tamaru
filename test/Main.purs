@@ -2,6 +2,7 @@ module Test.Main (main) where
 
 import Bouzuya.Halogen.StringRenderer (render)
 import Client.Component.App (app)
+import Client.Component.DataList (dataList)
 import Client.Component.GroupList (groupList)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.AVar (AVAR)
@@ -65,3 +66,20 @@ main = runTest do
           ]
         )
         (render groupList { groupList: [{ id: "1", data: [] }] })
+    test "dataList (empty)" do
+      Assert.equal
+        (intercalate ""
+          [ "<ul class=\"data-list\">"
+          , "</ul>"
+          ]
+        )
+        (render dataList { dataList: [] })
+    test "dataList (not empty)" do
+      Assert.equal
+        (intercalate ""
+          [ "<ul class=\"data-list\">"
+          , "<li class=\"data-list-item\">1</li>"
+          , "</ul>"
+          ]
+        )
+        (render dataList { dataList: [{ id: "1", value: "a" }] })
