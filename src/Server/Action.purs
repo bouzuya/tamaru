@@ -16,7 +16,7 @@ import Data.Argonaut (decodeJson, jsonParser)
 import Data.Either (either)
 import Data.Maybe (Maybe(..))
 import Data.StrMap as StrMap
-import Prelude (class Show, bind, const, pure, unit, ($), (<>), (=<<))
+import Prelude (class Show, bind, const, pure, ($), (<>), (=<<))
 import Server.DB (Context, addData, findDataAllByGroupId, findDataByGroupIdAndDataId, findGroupAll, findGroupById)
 import Server.Response (response200, response400, response404, response500)
 import Server.View (View(..))
@@ -48,7 +48,7 @@ handleAction
   -> Request
   -> Aff (ServerEff (ref :: REF | e)) Response
 handleAction context GetIndex _ = do
-  view <- pure (IndexView (render app unit))
+  view <- pure (IndexView (render app { groupList: [] })) -- TODO
   pure $ response200 "text/html" view
 handleAction context GetGroupList _ = do
   groups <- findGroupAll context

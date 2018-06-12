@@ -11,7 +11,7 @@ import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
 import DOM (DOM)
 import Data.Foldable (intercalate)
-import Prelude (Unit, discard, unit)
+import Prelude (Unit, discard)
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
 import Test.Unit.Console (TESTOUTPUT)
@@ -48,7 +48,7 @@ main = runTest do
           , "</html>"
           ]
         )
-        (render app unit)
+        (render app { groupList: [] })
     test "groupList (empty)" do
       Assert.equal
         (intercalate ""
