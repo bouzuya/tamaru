@@ -5,6 +5,7 @@ module Client.Component.DataList
   , dataList
   ) where
 
+import Data.Array as Array
 import Data.Maybe (Maybe(..))
 import Halogen (ClassName(..))
 import Halogen as H
@@ -41,5 +42,5 @@ dataList =
         [ HP.classes [ ClassName "data-list-item" ] ]
         [ HH.text d.id ]
       )
-      state.dataList
+      (Array.take 7 state.dataList)
     )
