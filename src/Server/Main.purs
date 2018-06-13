@@ -19,26 +19,36 @@ import Node.Process (PROCESS, lookupEnv)
 import Prelude (Unit, bind, pure, ($), (<$>))
 import Server.Action (handleAction)
 import Server.DB (Context, Config)
-import Server.Path (parsePath')
-import Server.Response (response302, response404)
+import Server.Path (normalizePath, parsePath')
+import Server.Response (response200, response302, response404)
 import Server.Route (route)
 import Server.Sheets (getGroupList)
+import Server.Static (staticRoute, StaticEff)
+import Server.View (View(..))
 
 onRequest
   :: forall e
   . Context
   -> Request
-  -> Aff (ServerEff (ref :: REF | e)) Response
+  -> Aff
+    (ServerEff (StaticEff (ref :: REF | e)))
+    Response
 onRequest context request@{ method, pathname } = do
   case parsePath' pathname of
     Left location ->
       pure $ response302 location
-    Right normalizedPath ->
-      case route method normalizedPath of
+    Right parsedPath -> do
+      match <- liftEff $ staticRoute "public" (normalizePath parsedPath)
+      case match of
+        Just static ->
+          -- TODO: fix mime type
+          pure (response200 "application/javascript" (StaticView static))
         Nothing ->
-          pure response404
-        Just action ->
-          handleAction context action request
+          case route method parsedPath of
+            Nothing ->
+              pure response404
+            Just action ->
+              handleAction context action request
 
 onListen :: forall e. Eff (console :: CONSOLE | e) Unit
 onListen = log "listening..."
@@ -56,11 +66,13 @@ main
   :: forall e
   . Eff
     (ServerEff
-      ( console :: CONSOLE
-      , exception :: EXCEPTION
-      , process :: PROCESS
-      , ref :: REF
-      | e)
+      (StaticEff
+        ( console :: CONSOLE
+        , exception :: EXCEPTION
+        , process :: PROCESS
+        , ref :: REF
+        | e)
+      )
     )
     Unit
 main = launchAff_ do
