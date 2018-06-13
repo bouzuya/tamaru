@@ -18,6 +18,7 @@ data View
   | GroupView Group
   | IndexView String
   | RequestView Request
+  | StaticView String
 
 instance encodeJsonView :: EncodeJson View where
   encodeJson (DataListView xs) =
@@ -35,7 +36,7 @@ instance encodeJsonView :: EncodeJson View where
       StrMap.fromFoldable
         [ "id" := x.id
         ]
-  encodeJson (IndexView s) =  encodeJson s
+  encodeJson (IndexView s) = encodeJson s
   encodeJson (RequestView r) =
     encodeJson $
       StrMap.fromFoldable
@@ -44,7 +45,9 @@ instance encodeJsonView :: EncodeJson View where
         , "query" := encodeJson r.searchParams
         , "body" := r.body
         ]
+  encodeJson (StaticView s) = encodeJson s
 
 instance showView :: Show View where
   show (IndexView s) = s
+  show (StaticView s) = s
   show view = Json.stringify $ encodeJson view
