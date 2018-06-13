@@ -58,5 +58,8 @@ app =
       , HH.footer []
         [ HH.text "bouzuya"
         ]
+      , HH.script
+        [ HP.src "/scripts/index.js" ]
+        []
       ]
     ]
