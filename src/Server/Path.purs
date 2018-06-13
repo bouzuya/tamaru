@@ -1,5 +1,6 @@
 module Server.Path
-  ( parsePath'
+  ( normalizePath
+  , parsePath'
   ) where
 
 import Data.Array as Array
