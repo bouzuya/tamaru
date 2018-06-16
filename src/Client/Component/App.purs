@@ -44,6 +44,8 @@ app =
     [ HH.head []
       [ HH.title []
         [ HH.text "tamaru" ]
+      , HH.script []
+        [ HH.text "window.INITIAL_STATE = [1, 2];" ] -- TODO
       ]
     , HH.body []
       [ HH.header []
