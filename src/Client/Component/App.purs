@@ -9,7 +9,7 @@ import Client.Component.Body as Body
 import Data.Either.Nested (Either1)
 import Data.Functor.Coproduct.Nested (Coproduct1)
 import Data.Maybe (Maybe(..))
-import Halogen (ClassName(..))
+import Halogen (AttrName(..), ClassName(..))
 import Halogen as H
 import Halogen.Component.ChildPath as CP
 import Halogen.HTML as HH
@@ -44,8 +44,6 @@ app =
     [ HH.head []
       [ HH.title []
         [ HH.text "tamaru" ]
-      , HH.script []
-        [ HH.text "window.INITIAL_STATE = [1, 2];" ] -- TODO
       ]
     , HH.body []
       [ HH.header []
@@ -61,7 +59,8 @@ app =
         [ HH.text "bouzuya"
         ]
       , HH.script
-        [ HP.src "/scripts/index.js" ]
+        [ HP.attr (AttrName "tamaru-data") "[\"b\",\"2\"]"
+        , HP.src "/scripts/index.js" ]
         []
       ]
     ]
