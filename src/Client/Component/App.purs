@@ -6,16 +6,22 @@ module Client.Component.App
   ) where
 
 import Client.Component.Body as Body
+import Data.Argonaut (Json, encodeJson)
+import Data.Argonaut as Json
 import Data.Either.Nested (Either1)
+import Data.Foldable (fold, intercalate)
 import Data.Functor.Coproduct.Nested (Coproduct1)
 import Data.Maybe (Maybe(..))
+import Data.StrMap (StrMap)
+import Data.StrMap as StrMap
+import Data.Tuple (Tuple(..))
 import Halogen (AttrName(..), ClassName(..))
 import Halogen as H
 import Halogen.Component.ChildPath as CP
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Prelude (type (~>), Unit, Void, absurd, const, id, pure, unit)
-import Server.Model (Group)
+import Prelude (type (~>), Unit, Void, absurd, const, id, map, pure, unit, ($))
+import Server.Model (Group, Data)
 
 type ChildQuery = Coproduct1 Body.Query
 type ChildSlot = Either1 Unit
@@ -59,8 +65,28 @@ app =
         [ HH.text "bouzuya"
         ]
       , HH.script
-        [ HP.attr (AttrName "tamaru-data") "[\"b\",\"2\"]"
+        [ HP.attr (AttrName "data-initial-state") (toString state)
         , HP.src "/scripts/index.js" ]
         []
       ]
     ]
+
+  toString :: State -> String
+  toString state = Json.stringify $ encodeJson $
+    StrMap.fromFoldable
+    [ Tuple "groupList" (encodeJson (map encodeJsonGroup state.groupList))
+    ]
+    where
+      encodeJsonGroup :: Group -> Json
+      encodeJsonGroup group = encodeJson $
+        StrMap.fromFoldable
+        [ Tuple "id" (encodeJson group.id)
+        , Tuple "data" (encodeJson (map encodeJsonData group.data))
+        ]
+      encodeJsonData :: Data -> Json
+      encodeJsonData d = encodeJson $
+        StrMap.fromFoldable
+        [ Tuple "id" (encodeJson d.id)
+        , Tuple "value" (encodeJson d.value)
+        ]
+
