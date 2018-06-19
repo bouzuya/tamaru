@@ -5,7 +5,7 @@ module Client.Component.ServerRoot
   , serverRoot
   ) where
 
-import Client.Component.Body as Body
+import Client.Component.ClientRoot as ClientRoot
 import Data.Argonaut (Json, encodeJson)
 import Data.Argonaut as Json
 import Data.Either.Nested (Either1)
@@ -23,7 +23,7 @@ import Halogen.HTML.Properties as HP
 import Prelude (type (~>), Unit, Void, absurd, const, id, map, pure, unit, ($))
 import Server.Model (Group, Data)
 
-type ChildQuery = Coproduct1 Body.Query
+type ChildQuery = Coproduct1 ClientRoot.Query
 type ChildSlot = Either1 Unit
 
 type State = { groupList :: Array Group }
@@ -60,7 +60,7 @@ serverRoot =
         [ HP.classes
           [ ClassName "body" ]
         ]
-        [ HH.slot' CP.cp1 unit Body.body state absurd ]
+        [ HH.slot' CP.cp1 unit ClientRoot.clientRoot state absurd ]
       , HH.footer []
         [ HH.text "bouzuya"
         ]

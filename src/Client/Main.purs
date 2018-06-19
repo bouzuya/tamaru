@@ -1,6 +1,6 @@
 module Client.Main (main) where
 
-import Client.Component.Body as Body
+import Client.Component.ClientRoot as ClientRoot
 import Control.Bind (bind, pure)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
@@ -71,4 +71,4 @@ main = HA.runHalogenAff do
   _ <- liftEff (removeChild child (htmlElementToNode body))
   initialState' <- loadInitialState
   initialState <- maybe (throwError (error "no state")) pure initialState'
-  runUI Body.body initialState body
+  runUI ClientRoot.clientRoot initialState body

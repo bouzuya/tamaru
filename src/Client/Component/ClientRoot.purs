@@ -1,8 +1,8 @@
-module Client.Component.Body
+module Client.Component.ClientRoot
   ( Input
   , Output
   , Query
-  , body
+  , clientRoot
   ) where
 
 import Client.Component.DataList as DataList
@@ -31,8 +31,8 @@ data Query a
 type Input = { groupList :: Array Group } -- input value
 type Output = Void -- output message
 
-body :: forall m. H.Component HH.HTML Query Input Output m
-body =
+clientRoot :: forall m. H.Component HH.HTML Query Input Output m
+clientRoot =
   H.parentComponent
     { initialState: id
     , render
