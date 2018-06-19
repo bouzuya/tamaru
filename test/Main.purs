@@ -81,7 +81,10 @@ main = runTest do
       Assert.equal
         (intercalate ""
           [ "<ul class=\"data-list\">"
-          , "<li class=\"data-list-item\">1</li>"
+          , "<li class=\"data-list-item\">"
+          , "<span class=\"id\">1</span>"
+          , "<span class=\"value\">a</span>"
+          , "</li>"
           , "</ul>"
           ]
         )

@@ -40,7 +40,9 @@ dataList =
       (\d ->
         HH.li
         [ HP.classes [ ClassName "data-list-item" ] ]
-        [ HH.text d.id ]
+        [ HH.span [ HP.classes [ ClassName "id" ] ] [ HH.text d.id ]
+        , HH.span [ HP.classes [ ClassName "value" ] ] [ HH.text d.value ]
+        ]
       )
       (Array.take 7 state.dataList)
     )
