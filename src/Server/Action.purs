@@ -5,11 +5,11 @@ module Server.Action
   , handleAction
   ) where
 
-import Bouzuya.Halogen.StringRenderer (render)
 import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.Server.Node (ServerEff)
-import Client.Component.App (app)
+import Bouzuya.Halogen.StringRenderer (render)
+import Client.Component.ServerRoot (serverRoot)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff.Ref (REF)
 import Data.Argonaut (decodeJson, jsonParser)
@@ -49,7 +49,7 @@ handleAction
   -> Aff (ServerEff (ref :: REF | e)) Response
 handleAction context GetIndex _ = do
   groupList <- findGroupAll context
-  view <- pure (IndexView (render app { groupList }))
+  view <- pure (IndexView (render serverRoot { groupList }))
   pure $ response200 "text/html" view
 handleAction context GetGroupList _ = do
   groups <- findGroupAll context

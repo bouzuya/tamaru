@@ -1,7 +1,7 @@
 module Test.Main (main) where
 
 import Bouzuya.Halogen.StringRenderer (render)
-import Client.Component.App (app)
+import Client.Component.ServerRoot (serverRoot)
 import Client.Component.DataList (dataList)
 import Client.Component.GroupList (groupList)
 import Control.Monad.Eff (Eff)
@@ -48,7 +48,7 @@ main = runTest do
           , "</html>"
           ]
         )
-        (render app { groupList: [] })
+        (render serverRoot { groupList: [] })
     test "groupList (empty)" do
       Assert.equal
         (intercalate ""

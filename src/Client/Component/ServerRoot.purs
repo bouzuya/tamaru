@@ -1,8 +1,8 @@
-module Client.Component.App
+module Client.Component.ServerRoot
   ( Input
   , Output
   , Query
-  , app
+  , serverRoot
   ) where
 
 import Client.Component.Body as Body
@@ -32,8 +32,8 @@ data Query a
 type Input = { groupList :: Array Group } -- input value
 type Output = Void -- output message
 
-app :: forall m. H.Component HH.HTML Query Input Output m
-app =
+serverRoot :: forall m. H.Component HH.HTML Query Input Output m
+serverRoot =
   H.parentComponent
     { initialState: id
     , render
