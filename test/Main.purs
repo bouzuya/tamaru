@@ -31,7 +31,7 @@ main
     Unit
 main = runTest do
   suite "Bouzuya.Halogen.StringRenderer" do
-    test "app" do
+    test "ServerRoot" do
       Assert.equal
         (intercalate ""
           [ "<html>"
@@ -39,11 +39,14 @@ main = runTest do
           , "<body>"
           , "<header><h1>tamaru</h1></header>"
           , "<div class=\"body\">"
+          , "<div class=\"body\">"
           , "<p>body</p>"
           , "<select class=\"group-list\"></select>"
           , "<ul class=\"data-list\"></ul>"
           , "</div>"
+          , "</div>"
           , "<footer>bouzuya</footer>"
+          , "<script data-initial-state=\"{&quot;groupList&quot;:[]}\" src=\"&#x2F;scripts&#x2F;index.js\"></script>"
           , "</body>"
           , "</html>"
           ]
