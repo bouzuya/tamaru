@@ -5,11 +5,14 @@ module Client.Component.ClientRoot
   , clientRoot
   ) where
 
+import Client.Component.DataInput as DataInput
 import Client.Component.DataList as DataList
 import Client.Component.GroupList as GroupList
+import Control.Monad.Aff (Aff)
+import DOM (DOM)
 import Data.Array as Array
-import Data.Either.Nested (Either2)
-import Data.Functor.Coproduct.Nested (Coproduct2)
+import Data.Either.Nested (Either3)
+import Data.Functor.Coproduct.Nested (Coproduct3)
 import Data.Maybe (Maybe(..), maybe)
 import Halogen (ClassName(..))
 import Halogen as H
@@ -20,18 +23,19 @@ import Halogen.HTML.Properties as HP
 import Prelude (type (~>), Unit, Void, const, id, pure, unit)
 import Server.Model (Group)
 
-type ChildQuery = Coproduct2 GroupList.Query DataList.Query
-type ChildSlot = Either2 Unit Unit
+type ChildQuery = Coproduct3 GroupList.Query DataInput.Query DataList.Query
+type ChildSlot = Either3 Unit Unit Unit
 
 type State = { groupList :: Array Group }
 data Query a
-  = HandleDataList DataList.Output a
+  = HandleDataInput DataInput.Output a
+  | HandleDataList DataList.Output a
   | HandleGroupList GroupList.Output a
   | Noop a
 type Input = { groupList :: Array Group } -- input value
 type Output = Void -- output message
 
-clientRoot :: forall m. H.Component HH.HTML Query Input Output m
+clientRoot :: forall e. H.Component HH.HTML Query Input Output (Aff (dom :: DOM | e))
 clientRoot =
   H.parentComponent
     { initialState: id
@@ -40,12 +44,13 @@ clientRoot =
     , receiver: const Nothing
     }
   where
-  eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output m
+  eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output (Aff (dom :: DOM | e))
+  eval (HandleDataInput _ a) = pure a
   eval (HandleDataList _ a) = pure a
   eval (HandleGroupList _ a) = pure a
   eval (Noop a) = pure a
 
-  render :: State -> H.ParentHTML Query ChildQuery ChildSlot m
+  render :: State -> H.ParentHTML Query ChildQuery ChildSlot (Aff (dom :: DOM | e))
   render state =
     HH.div
     [ HP.classes [ ClassName "body" ] ]
@@ -59,6 +64,12 @@ clientRoot =
       (HE.input HandleGroupList)
     , HH.slot'
       CP.cp2
+      unit
+      DataInput.dataInput
+      unit
+      (HE.input HandleDataInput)
+    , HH.slot'
+      CP.cp3
       unit
       DataList.dataList
       { dataList: maybe [] (\g -> g.data) (Array.head state.groupList) }

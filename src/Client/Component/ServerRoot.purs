@@ -6,13 +6,13 @@ module Client.Component.ServerRoot
   ) where
 
 import Client.Component.ClientRoot as ClientRoot
+import Control.Monad.Aff (Aff)
+import DOM (DOM)
 import Data.Argonaut (Json, encodeJson)
 import Data.Argonaut as Json
 import Data.Either.Nested (Either1)
-import Data.Foldable (fold, intercalate)
 import Data.Functor.Coproduct.Nested (Coproduct1)
 import Data.Maybe (Maybe(..))
-import Data.StrMap (StrMap)
 import Data.StrMap as StrMap
 import Data.Tuple (Tuple(..))
 import Halogen (AttrName(..), ClassName(..))
@@ -32,7 +32,7 @@ data Query a
 type Input = { groupList :: Array Group } -- input value
 type Output = Void -- output message
 
-serverRoot :: forall m. H.Component HH.HTML Query Input Output m
+serverRoot :: forall e. H.Component HH.HTML Query Input Output (Aff (dom :: DOM | e))
 serverRoot =
   H.parentComponent
     { initialState: id
@@ -41,10 +41,10 @@ serverRoot =
     , receiver: const Nothing
     }
   where
-  eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output m
+  eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output (Aff (dom :: DOM | e))
   eval (Noop a) = pure a
 
-  render :: State -> H.ParentHTML Query ChildQuery ChildSlot m
+  render :: State -> H.ParentHTML Query ChildQuery ChildSlot (Aff (dom :: DOM | e))
   render state =
     HH.html []
     [ HH.head []
