@@ -19,8 +19,8 @@ componentToString
   -> String
 componentToString component input =
   H.unComponent
-    (\{ initialState, render } ->
-      let (HH.HTML vdom) = render (initialState input) in
+    (\{ initialState, render: render' } ->
+      let (HH.HTML vdom) = render' (initialState input) in
       VSR.render componentSlotToString vdom
     )
     component
