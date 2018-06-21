@@ -10,12 +10,13 @@ import Data.Maybe (Maybe(..))
 import Halogen (ClassName(..))
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Prelude (type (~>), const, map, pure)
+import Prelude (type (~>), bind, map, pure)
 import Server.Model (Data)
 
 type State = { dataList :: Array Data }
-data Query a = Noop a
+data Query a = HandleInput Input a
 type Input = { dataList :: Array Data }
 data Output = Void
 
@@ -25,11 +26,13 @@ dataList =
     { initialState: (\i -> { dataList: i.dataList })
     , render
     , eval
-    , receiver: const Nothing
+    , receiver: HE.input HandleInput
     }
   where
   eval :: Query ~> (H.ComponentDSL State Query Output m)
-  eval (Noop next) = pure next
+  eval (HandleInput { dataList } next) = do
+    _ <- H.modify (_ { dataList = dataList })
+    pure next
 
   render :: State -> H.ComponentHTML Query
   render state =
