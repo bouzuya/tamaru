@@ -44,6 +44,6 @@
     "watch:client:dir": "mkdirp public/scripts",
     "watch:client:scripts": "pulp --watch browserify --main Client.Main --optimise --to public/scripts/index.js",
     "watch:server": "pulp --watch build --main Server.Main",
-    "watch:start": "nodemon --watch output --exec 'npm start'"
+    "watch:start": "nodemon --delay 2 --watch output --exec 'npm start'"
   }
 }
