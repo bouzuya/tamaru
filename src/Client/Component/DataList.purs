@@ -6,7 +6,6 @@ module Client.Component.DataList
   ) where
 
 import Data.Array as Array
-import Data.Maybe (Maybe(..))
 import Halogen (ClassName(..))
 import Halogen as H
 import Halogen.HTML as HH
@@ -30,8 +29,8 @@ dataList =
     }
   where
   eval :: Query ~> (H.ComponentDSL State Query Output m)
-  eval (HandleInput { dataList } next) = do
-    _ <- H.modify (_ { dataList = dataList })
+  eval (HandleInput i next) = do
+    _ <- H.modify (_ { dataList = i.dataList })
     pure next
 
   render :: State -> H.ComponentHTML Query

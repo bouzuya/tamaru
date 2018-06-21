@@ -37,7 +37,7 @@ groupList =
     case find (\({ id }) -> eq id value) s.groupList of
       Nothing -> pure next
       Just group -> do
-        H.modify \s -> s { selected = Just group.id }
+        H.modify (_ { selected = Just group.id })
         H.raise (Selected group.id)
         pure next
 
