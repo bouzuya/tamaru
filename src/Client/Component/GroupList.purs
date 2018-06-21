@@ -1,6 +1,6 @@
 module Client.Component.GroupList
   ( Input
-  , Output
+  , Output(..)
   , Query
   , groupList
   ) where

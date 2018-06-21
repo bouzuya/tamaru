@@ -7,6 +7,7 @@ module Client.Component.ClientRoot
 
 import Client.Component.DataInput as DataInput
 import Client.Component.DataList as DataList
+import Client.Component.GroupList (Output(..)) as GroupListOutput
 import Client.Component.GroupList as GroupList
 import Control.Monad.Aff (Aff)
 import DOM (DOM)
@@ -20,13 +21,16 @@ import Halogen.Component.ChildPath as CP
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Prelude (type (~>), Unit, Void, const, id, pure, unit)
+import Prelude (type (~>), Unit, Void, bind, const, pure, unit, (==))
 import Server.Model (Group)
 
 type ChildQuery = Coproduct3 GroupList.Query DataInput.Query DataList.Query
 type ChildSlot = Either3 Unit Unit Unit
 
-type State = { groupList :: Array Group }
+type State =
+  { groupList :: Array Group
+  , selectedGroup :: Maybe Group
+  }
 data Query a
   = HandleDataInput DataInput.Output a
   | HandleDataList DataList.Output a
@@ -38,7 +42,7 @@ type Output = Void -- output message
 clientRoot :: forall e. H.Component HH.HTML Query Input Output (Aff (dom :: DOM | e))
 clientRoot =
   H.parentComponent
-    { initialState: id
+    { initialState
     , render
     , eval
     , receiver: const Nothing
@@ -47,8 +51,18 @@ clientRoot =
   eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output (Aff (dom :: DOM | e))
   eval (HandleDataInput _ a) = pure a
   eval (HandleDataList _ a) = pure a
-  eval (HandleGroupList _ a) = pure a
+  eval (HandleGroupList (GroupListOutput.Selected groupId) next) = do
+    { groupList } <- H.get
+    let group = Array.find (\{ id } -> id == groupId) groupList
+    _ <- H.modify (_ { selectedGroup = group })
+    pure next
   eval (Noop a) = pure a
+
+  initialState :: Input -> State
+  initialState { groupList } =
+    { groupList
+    , selectedGroup: Array.head groupList
+    }
 
   render :: State -> H.ParentHTML Query ChildQuery ChildSlot (Aff (dom :: DOM | e))
   render state =
@@ -72,6 +86,6 @@ clientRoot =
       CP.cp3
       unit
       DataList.dataList
-      { dataList: maybe [] (\g -> g.data) (Array.head state.groupList) }
+      { dataList: maybe [] (\g -> g.data) state.selectedGroup }
       (HE.input HandleDataList)
     ]
