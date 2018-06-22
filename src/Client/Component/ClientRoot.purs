@@ -56,12 +56,12 @@ clientRoot =
       Nothing -> pure next
       Just group -> do
         _ <- runMaybeT do
-          let
-            -- TODO: today
-            today = "2018-06-22"
-            -- TODO: upsert
-            newData = append group.data [{ id: today, value }]
-            newGroup = { id: group.id, data: newData }
+          -- TODO: today
+          let today = "2018-06-22"
+          newData <- MaybeT $ pure $ case Array.findIndex (\i -> i.id == today) group.data of
+            Nothing -> Just $ append group.data [{ id: today, value }]
+            Just dataIndex -> Array.updateAt dataIndex { id: today, value } group.data
+          let newGroup = { id: group.id, data: newData }
           index <- MaybeT $ pure $ Array.findIndex (\i -> i.id == group.id) groupList
           newGroupList <- MaybeT $ pure $ Array.updateAt index newGroup groupList
           lift $ H.modify (_ { groupList = newGroupList, selectedGroup = Just newGroup })
