@@ -1,6 +1,6 @@
 module Client.Component.DataInput
   ( Input
-  , Output
+  , Output(..)
   , Query
   , dataInput
   ) where
@@ -21,7 +21,8 @@ data Query a
   = Change String a
   | Submit Event a
 type Input = Unit
-data Output = Void
+data Output
+  = DataAdded String
 
 dataInput :: forall e. H.Component HH.HTML Query Input Output (Aff (dom :: DOM | e))
 dataInput =
@@ -38,7 +39,8 @@ dataInput =
     pure next
   eval (Submit event q) = do
     _ <- liftEff (preventDefault event)
-    -- TODO
+    value <- H.gets _.value
+    _ <- H.raise (DataAdded value)
     pure q
 
   render :: State -> H.ComponentHTML Query
