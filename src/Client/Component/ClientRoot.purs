@@ -14,7 +14,7 @@ import DOM (DOM)
 import Data.Array as Array
 import Data.Either.Nested (Either3)
 import Data.Functor.Coproduct.Nested (Coproduct3)
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Halogen (ClassName(..), lift)
 import Halogen as H
 import Halogen.Component.ChildPath as CP
@@ -39,6 +39,14 @@ data Query a
 type Input = { groupList :: Array Group } -- input value
 type Output = Void -- output message
 
+update :: forall a. (a -> Boolean) -> a -> Array a -> Maybe (Array a)
+update f x xs = do
+  i <- Array.findIndex f xs
+  Array.updateAt i x xs
+
+upsert :: forall a. (a -> Boolean) -> a -> Array a -> Array a
+upsert f x xs = fromMaybe (append xs [x]) (update f x xs)
+
 clientRoot :: forall e. H.Component HH.HTML Query Input Output (Aff (dom :: DOM | e))
 clientRoot =
   H.parentComponent
@@ -57,13 +65,11 @@ clientRoot =
       Just group -> do
         _ <- runMaybeT do
           -- TODO: today
-          let today = "2018-06-22"
-          newData <- MaybeT $ pure $ case Array.findIndex (\i -> i.id == today) group.data of
-            Nothing -> Just $ append group.data [{ id: today, value }]
-            Just dataIndex -> Array.updateAt dataIndex { id: today, value } group.data
+          let
+            today = "2018-06-22"
+            newData = upsert (\i -> i.id == today) { id: today, value } group.data
           let newGroup = { id: group.id, data: newData }
-          index <- MaybeT $ pure $ Array.findIndex (\i -> i.id == group.id) groupList
-          newGroupList <- MaybeT $ pure $ Array.updateAt index newGroup groupList
+          newGroupList <- MaybeT $ pure $ update (\i -> i.id == group.id) newGroup groupList
           lift $ H.modify (_ { groupList = newGroupList, selectedGroup = Just newGroup })
         pure next
   eval (HandleDataList _ a) = pure a
