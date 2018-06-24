@@ -13,6 +13,7 @@ import DOM (DOM)
 import Data.Foldable (intercalate)
 import Prelude (Unit, discard)
 import Test.DayOfYear as DayOfYear
+import Test.DateTime as DateTime
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
 import Test.Unit.Console (TESTOUTPUT)
@@ -31,6 +32,7 @@ main
     )
     Unit
 main = runTest do
+  DateTime.tests
   DayOfYear.tests
   suite "Bouzuya.Halogen.StringRenderer" do
     test "ServerRoot" do
