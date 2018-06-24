@@ -1,4 +1,4 @@
-module Client.DateTime.Component.DayOfYear
+module Bouzuya.DateTime.Component.DayOfYear
   ( DayOfYear
   , canonicalDateFromDayOfYear
   , dayOfYear
