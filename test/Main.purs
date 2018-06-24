@@ -1,9 +1,9 @@
 module Test.Main (main) where
 
 import Bouzuya.Halogen.StringRenderer (render)
-import Client.Component.ServerRoot (serverRoot)
 import Client.Component.DataList (dataList)
 import Client.Component.GroupList (groupList)
+import Client.Component.ServerRoot (serverRoot)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.AVar (AVAR)
 import Control.Monad.Eff.Console (CONSOLE)
@@ -12,6 +12,7 @@ import Control.Monad.Eff.Ref (REF)
 import DOM (DOM)
 import Data.Foldable (intercalate)
 import Prelude (Unit, discard)
+import Test.DayOfYear as DayOfYear
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
 import Test.Unit.Console (TESTOUTPUT)
@@ -30,6 +31,7 @@ main
     )
     Unit
 main = runTest do
+  DayOfYear.tests
   suite "Bouzuya.Halogen.StringRenderer" do
     test "ServerRoot" do
       Assert.equal
