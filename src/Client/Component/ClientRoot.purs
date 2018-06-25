@@ -1,5 +1,6 @@
 module Client.Component.ClientRoot
-  ( Input
+  ( Effect
+  , Input
   , Output
   , Query
   , clientRoot
@@ -8,20 +9,24 @@ module Client.Component.ClientRoot
 import Client.Component.DataInput as DataInput
 import Client.Component.DataList as DataList
 import Client.Component.GroupList as GroupList
+import Client.DateTimeFormatter (calendarDateExtendedFormatter)
 import Control.Monad.Aff (Aff)
+import Control.Monad.Eff.Now (NOW, now)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import DOM (DOM)
 import Data.Array as Array
+import Data.DateTime.Instant (toDateTime)
 import Data.Either.Nested (Either3)
+import Data.Formatter.DateTime as DateTimeFormatter
 import Data.Functor.Coproduct.Nested (Coproduct3)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
-import Halogen (ClassName(..), lift)
+import Halogen (ClassName(..), lift, liftEff)
 import Halogen as H
 import Halogen.Component.ChildPath as CP
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Prelude (type (~>), Unit, Void, append, bind, const, pure, unit, ($), (==))
+import Prelude (type (~>), Unit, Void, append, bind, const, map, pure, unit, ($), (==))
 import Server.Model (Group)
 
 type ChildQuery = Coproduct3 GroupList.Query DataInput.Query DataList.Query
@@ -38,6 +43,7 @@ data Query a
   | Noop a
 type Input = { groupList :: Array Group } -- input value
 type Output = Void -- output message
+type Effect e = (dom :: DOM, now :: NOW | e)
 
 update :: forall a. (a -> Boolean) -> a -> Array a -> Maybe (Array a)
 update f x xs = do
@@ -47,7 +53,7 @@ update f x xs = do
 upsert :: forall a. (a -> Boolean) -> a -> Array a -> Array a
 upsert f x xs = fromMaybe (append xs [x]) (update f x xs)
 
-clientRoot :: forall e. H.Component HH.HTML Query Input Output (Aff (dom :: DOM | e))
+clientRoot :: forall e. H.Component HH.HTML Query Input Output (Aff (Effect e))
 clientRoot =
   H.parentComponent
     { initialState
@@ -56,19 +62,20 @@ clientRoot =
     , receiver: const Nothing
     }
   where
-  eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output (Aff (dom :: DOM | e))
+  eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output (Aff (Effect e))
   eval (HandleDataInput (DataInput.DataAdded value) next) = do
     -- TODO: validation
+    today <- liftEff
+      $ map (DateTimeFormatter.format calendarDateExtendedFormatter)
+      $ map toDateTime now
     { groupList, selectedGroup } <- H.get
     case selectedGroup of
       Nothing -> pure next
       Just group -> do
         _ <- runMaybeT do
-          -- TODO: today
           let
-            today = "2018-06-22"
             newData = upsert (\i -> i.id == today) { id: today, value } group.data
-          let newGroup = { id: group.id, data: newData }
+            newGroup = { id: group.id, data: newData }
           newGroupList <- MaybeT $ pure $ update (\i -> i.id == group.id) newGroup groupList
           lift $ H.modify (_ { groupList = newGroupList, selectedGroup = Just newGroup })
         pure next
@@ -86,7 +93,7 @@ clientRoot =
     , selectedGroup: Array.head groupList
     }
 
-  render :: State -> H.ParentHTML Query ChildQuery ChildSlot (Aff (dom :: DOM | e))
+  render :: State -> H.ParentHTML Query ChildQuery ChildSlot (Aff (Effect e))
   render state =
     HH.div
     [ HP.classes [ ClassName "body" ] ]

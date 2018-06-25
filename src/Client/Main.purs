@@ -21,9 +21,11 @@ import Halogen.VDom.Driver (runUI)
 import Prelude (const, discard, ($))
 import Server.Model (Group, Data)
 
+type Effect e = HA.HalogenEffects (ClientRoot.Effect e)
+
 loadInitialState
   :: forall e
-  . Aff (HA.HalogenEffects e) (Maybe { groupList :: Array Group })
+  . Aff (Effect e) (Maybe { groupList :: Array Group })
 loadInitialState = do
   stateElement' <- HA.selectElement (QuerySelector "script")
   stateElement <- maybe
@@ -61,7 +63,7 @@ loadInitialState = do
           value <- o .? "value"
           pure { id, value }
 
-main :: Eff (HA.HalogenEffects ()) Unit
+main :: Eff (Effect ()) Unit
 main = HA.runHalogenAff do
   HA.awaitLoad
   body' <- HA.selectElement (QuerySelector ".body")

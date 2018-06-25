@@ -1,5 +1,6 @@
 module Client.Component.ServerRoot
-  ( Input
+  ( Effect
+  , Input
   , Output
   , Query
   , serverRoot
@@ -31,8 +32,9 @@ data Query a
   = Noop a
 type Input = { groupList :: Array Group } -- input value
 type Output = Void -- output message
+type Effect e = (ClientRoot.Effect (dom :: DOM | e))
 
-serverRoot :: forall e. H.Component HH.HTML Query Input Output (Aff (dom :: DOM | e))
+serverRoot :: forall e. H.Component HH.HTML Query Input Output (Aff (Effect e))
 serverRoot =
   H.parentComponent
     { initialState: id
@@ -41,10 +43,10 @@ serverRoot =
     , receiver: const Nothing
     }
   where
-  eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output (Aff (dom :: DOM | e))
+  eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output (Aff (Effect e))
   eval (Noop a) = pure a
 
-  render :: State -> H.ParentHTML Query ChildQuery ChildSlot (Aff (dom :: DOM | e))
+  render :: State -> H.ParentHTML Query ChildQuery ChildSlot (Aff (Effect e))
   render state =
     HH.html []
     [ HH.head []
