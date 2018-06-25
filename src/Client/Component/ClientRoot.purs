@@ -11,6 +11,7 @@ import Client.Component.DataList as DataList
 import Client.Component.GroupList as GroupList
 import Client.DateTimeFormatter (calendarDateExtendedFormatter)
 import Control.Monad.Aff (Aff)
+import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Now (NOW, now)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import DOM (DOM)
@@ -45,6 +46,11 @@ type Input = { groupList :: Array Group } -- input value
 type Output = Void -- output message
 type Effect e = (dom :: DOM, now :: NOW | e)
 
+today :: forall e. Eff (now :: NOW | e) String
+today
+  = map (DateTimeFormatter.format calendarDateExtendedFormatter)
+  $ map toDateTime now
+
 update :: forall a. (a -> Boolean) -> a -> Array a -> Maybe (Array a)
 update f x xs = do
   i <- Array.findIndex f xs
@@ -65,16 +71,14 @@ clientRoot =
   eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output (Aff (Effect e))
   eval (HandleDataInput (DataInput.DataAdded value) next) = do
     -- TODO: validation
-    today <- liftEff
-      $ map (DateTimeFormatter.format calendarDateExtendedFormatter)
-      $ map toDateTime now
+    id <- liftEff today
     { groupList, selectedGroup } <- H.get
     case selectedGroup of
       Nothing -> pure next
       Just group -> do
         _ <- runMaybeT do
           let
-            newData = upsert (\i -> i.id == today) { id: today, value } group.data
+            newData = upsert (\i -> i.id == id) { id, value } group.data
             newGroup = { id: group.id, data: newData }
           newGroupList <- MaybeT $ pure $ update (\i -> i.id == group.id) newGroup groupList
           lift $ H.modify (_ { groupList = newGroupList, selectedGroup = Just newGroup })
@@ -82,7 +86,7 @@ clientRoot =
   eval (HandleDataList _ a) = pure a
   eval (HandleGroupList (GroupList.Selected groupId) next) = do
     { groupList } <- H.get
-    let group = Array.find (\{ id } -> id == groupId) groupList
+    let group = Array.find (\g -> g.id == groupId) groupList
     _ <- H.modify (_ { selectedGroup = group })
     pure next
   eval (Noop a) = pure a
