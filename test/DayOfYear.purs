@@ -1,7 +1,7 @@
 module Test.DayOfYear (tests) where
 
+import Bouzuya.DateTime (Month(..), canonicalDate)
 import Bouzuya.DateTime.Component.DayOfYear (canonicalDateFromDayOfYear, dayOfYear, exactDateFromDayOfYear, lastDayOfYear)
-import Data.Date (Month(..), canonicalDate)
 import Data.Enum (toEnum)
 import Data.Maybe (Maybe(..), fromJust)
 import Partial.Unsafe (unsafePartial)
