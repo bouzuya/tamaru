@@ -6,6 +6,7 @@ module Client.Component.ClientRoot
   , clientRoot
   ) where
 
+import Bouzuya.DateTime.Instant (toDateTime)
 import Client.Component.DataInput as DataInput
 import Client.Component.DataList as DataList
 import Client.Component.GroupList as GroupList
@@ -16,7 +17,6 @@ import Control.Monad.Eff.Now (NOW, now)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import DOM (DOM)
 import Data.Array as Array
-import Data.DateTime.Instant (toDateTime)
 import Data.Either.Nested (Either3)
 import Data.Formatter.DateTime as DateTimeFormatter
 import Data.Functor.Coproduct.Nested (Coproduct3)
