@@ -17,17 +17,20 @@ import Control.Monad.Eff.Now (NOW, now)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import DOM (DOM)
 import Data.Array as Array
+import Data.Either (either)
 import Data.Either.Nested (Either3)
 import Data.Formatter.DateTime as DateTimeFormatter
 import Data.Functor.Coproduct.Nested (Coproduct3)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.String.Regex as Regex
+import Data.String.Regex.Flags (noFlags)
 import Halogen (ClassName(..), lift, liftEff)
 import Halogen as H
 import Halogen.Component.ChildPath as CP
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Prelude (type (~>), Unit, Void, append, bind, const, map, pure, unit, ($), (==))
+import Prelude (type (~>), Unit, Void, append, bind, const, map, otherwise, pure, unit, ($), (==))
 import Server.Model (Group)
 
 type ChildQuery = Coproduct3 GroupList.Query DataInput.Query DataList.Query
@@ -59,6 +62,13 @@ update f x xs = do
 upsert :: forall a. (a -> Boolean) -> a -> Array a -> Array a
 upsert f x xs = fromMaybe (append xs [x]) (update f x xs)
 
+isValid :: String -> Boolean
+isValid value =
+  either
+    (const false)
+    (\regex -> Regex.test regex value)
+    (Regex.regex "^\\d+(\\.\\d+)?$" noFlags)
+
 clientRoot :: forall e. H.Component HH.HTML Query Input Output (Aff (Effect e))
 clientRoot =
   H.parentComponent
@@ -69,20 +79,22 @@ clientRoot =
     }
   where
   eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output (Aff (Effect e))
-  eval (HandleDataInput (DataInput.DataAdded value) next) = do
-    -- TODO: validation
-    id <- liftEff today
-    { groupList, selectedGroup } <- H.get
-    case selectedGroup of
-      Nothing -> pure next
-      Just group -> do
-        _ <- runMaybeT do
-          let
-            newData = upsert (\i -> i.id == id) { id, value } group.data
-            newGroup = { id: group.id, data: newData }
-          newGroupList <- MaybeT $ pure $ update (\i -> i.id == group.id) newGroup groupList
-          lift $ H.modify (_ { groupList = newGroupList, selectedGroup = Just newGroup })
-        pure next
+  eval (HandleDataInput (DataInput.DataAdded value) next)
+    | isValid value = do
+        id <- liftEff today
+        { groupList, selectedGroup } <- H.get
+        case selectedGroup of
+          Nothing -> pure next
+          Just group -> do
+            _ <- runMaybeT do
+              let
+                newData = upsert (\i -> i.id == id) { id, value } group.data
+                newGroup = { id: group.id, data: newData }
+              newGroupList <- MaybeT $ pure $ update (\i -> i.id == group.id) newGroup groupList
+              lift $ H.modify (_ { groupList = newGroupList, selectedGroup = Just newGroup })
+            pure next
+    | otherwise = pure next
+
   eval (HandleDataList _ a) = pure a
   eval (HandleGroupList (GroupList.Selected groupId) next) = do
     { groupList } <- H.get
