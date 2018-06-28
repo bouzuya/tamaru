@@ -1,4 +1,4 @@
-module Client.Component.GroupList
+module Common.Component.GroupList
   ( Input
   , Output(..)
   , Query

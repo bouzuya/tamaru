@@ -1,4 +1,4 @@
-module Client.Component.DataList
+module Common.Component.DataList
   ( Input
   , Output
   , Query

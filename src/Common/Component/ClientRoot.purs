@@ -1,4 +1,4 @@
-module Client.Component.ClientRoot
+module Common.Component.ClientRoot
   ( Effect
   , Input
   , Output
@@ -7,9 +7,9 @@ module Client.Component.ClientRoot
   ) where
 
 import Bouzuya.DateTime.Instant (toDateTime)
-import Client.Component.DataInput as DataInput
-import Client.Component.DataList as DataList
-import Client.Component.GroupList as GroupList
+import Common.Component.DataInput as DataInput
+import Common.Component.DataList as DataList
+import Common.Component.GroupList as GroupList
 import Client.DateTimeFormatter (calendarDateExtendedFormatter)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)

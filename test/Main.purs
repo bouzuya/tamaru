@@ -1,9 +1,9 @@
 module Test.Main (main) where
 
 import Bouzuya.Halogen.StringRenderer (render)
-import Client.Component.DataList (dataList)
-import Client.Component.GroupList (groupList)
-import Client.Component.ServerRoot (serverRoot)
+import Common.Component.DataList (dataList)
+import Common.Component.GroupList (groupList)
+import Common.Component.ServerRoot (serverRoot)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.AVar (AVAR)
 import Control.Monad.Eff.Console (CONSOLE)

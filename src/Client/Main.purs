@@ -1,6 +1,6 @@
 module Client.Main (main) where
 
-import Client.Component.ClientRoot as ClientRoot
+import Common.Component.ClientRoot as ClientRoot
 import Control.Bind (bind, pure)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)

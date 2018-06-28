@@ -1,4 +1,4 @@
-module Client.Component.DataInput
+module Common.Component.DataInput
   ( Input
   , Output(..)
   , Query

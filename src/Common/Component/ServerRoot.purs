@@ -1,4 +1,4 @@
-module Client.Component.ServerRoot
+module Common.Component.ServerRoot
   ( Effect
   , Input
   , Output
@@ -6,7 +6,7 @@ module Client.Component.ServerRoot
   , serverRoot
   ) where
 
-import Client.Component.ClientRoot as ClientRoot
+import Common.Component.ClientRoot as ClientRoot
 import Control.Monad.Aff (Aff)
 import DOM (DOM)
 import Data.Argonaut (Json, encodeJson)
