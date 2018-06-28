@@ -53,7 +53,6 @@ canonicalDateFromDayOfYear y d =
 dayOfYear :: Date -> DayOfYear
 dayOfYear d =
   let
-    startOfYear d = unsafeDate (year d) January (unsafeDay 1)
     (Days n) = diff d (startOfYear d)
     days = Days (Int.toNumber ((Int.floor n) + 1))
   in
@@ -90,6 +89,9 @@ lastDayOfYear y
 
 fromDays :: Days -> Maybe DayOfYear
 fromDays (Days n) = Int.fromNumber n >>= toEnum
+
+startOfYear :: Date -> Date
+startOfYear d = unsafeDate (year d) January (unsafeDay 1)
 
 toDays :: DayOfYear -> Days
 toDays (DayOfYear n) = Days (Int.toNumber n)
