@@ -1,4 +1,4 @@
-module Server.Model
+module Common.Model
   ( Data
   , DataId
   , DataValue

@@ -5,6 +5,7 @@ module Common.Component.GroupList
   , groupList
   ) where
 
+import Common.Model (Group, GroupId)
 import Data.Foldable (find)
 import Data.Maybe (Maybe(..))
 import Halogen (ClassName(..))
@@ -13,7 +14,6 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Prelude (type (~>), bind, const, discard, eq, map, pure)
-import Server.Model (Group, GroupId)
 
 type State = { groupList :: Array Group, selected :: Maybe GroupId }
 data Query a

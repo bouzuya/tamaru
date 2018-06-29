@@ -5,6 +5,7 @@ module Common.Component.DataList
   , dataList
   ) where
 
+import Common.Model (Data)
 import Data.Array as Array
 import Halogen (ClassName(..))
 import Halogen as H
@@ -12,7 +13,6 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Prelude (type (~>), bind, map, pure)
-import Server.Model (Data)
 
 type State = { dataList :: Array Data }
 data Query a = HandleInput Input a

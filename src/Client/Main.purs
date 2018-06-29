@@ -1,6 +1,7 @@
 module Client.Main (main) where
 
 import Common.Component.ClientRoot as ClientRoot
+import Common.Model (Group, Data)
 import Control.Bind (bind, pure)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
@@ -19,7 +20,6 @@ import Data.Unit (Unit)
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
 import Prelude (const, discard, ($))
-import Server.Model (Group, Data)
 
 type Effect e = HA.HalogenEffects (ClientRoot.Effect e)
 

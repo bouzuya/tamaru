@@ -3,13 +3,13 @@ module Server.View
   ) where
 
 import Bouzuya.HTTP.Request (Request)
+import Common.Model (Group, Data)
 import Data.Argonaut as Json
 import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=))
 import Data.Function (($))
 import Data.Functor ((<$>))
 import Data.Show (class Show, show)
 import Data.StrMap as StrMap
-import Server.Model (Group, Data)
 
 data View
   = DataListView (Array Data)

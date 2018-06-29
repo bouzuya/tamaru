@@ -8,6 +8,7 @@ module Server.DB
   , findGroupById
   ) where
 
+import Common.Model (Data, Group, GroupId, DataId)
 import Control.Bind (bind, pure, (<$>), (>>=))
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff.Class (liftEff)
@@ -18,7 +19,6 @@ import Data.Foldable (find)
 import Data.Function (($))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Semigroup ((<>))
-import Server.Model (Data, Group, GroupId, DataId)
 import Server.Sheets (addData) as Sheets
 
 type Config =

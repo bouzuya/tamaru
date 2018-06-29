@@ -7,6 +7,7 @@ module Common.Component.ServerRoot
   ) where
 
 import Common.Component.ClientRoot as ClientRoot
+import Common.Model (Group, Data)
 import Control.Monad.Aff (Aff)
 import DOM (DOM)
 import Data.Argonaut (Json, encodeJson)
@@ -22,7 +23,6 @@ import Halogen.Component.ChildPath as CP
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Prelude (type (~>), Unit, Void, absurd, const, id, map, pure, unit, ($))
-import Server.Model (Group, Data)
 
 type ChildQuery = Coproduct1 ClientRoot.Query
 type ChildSlot = Either1 Unit

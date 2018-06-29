@@ -5,6 +5,7 @@ module Server.Sheets
   , getGroupList
   ) where
 
+import Common.Model (Data, GroupId, Group)
 import Control.Bind (bind, pure, (<$>), (>>=))
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
@@ -21,7 +22,6 @@ import Data.Semigroup ((<>))
 import Data.Semiring ((+))
 import Data.Traversable (sequence)
 import Data.Unit (Unit)
-import Server.Model (Data, GroupId, Group)
 
 type ClientEmail = String
 type PrivateKey = String

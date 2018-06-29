@@ -11,6 +11,7 @@ import Common.Component.DataInput as DataInput
 import Common.Component.DataList as DataList
 import Common.Component.GroupList as GroupList
 import Common.DateTimeFormatter (calendarDateExtendedFormatter)
+import Common.Model (Group)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Now (NOW, now)
@@ -31,7 +32,6 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Prelude (type (~>), Unit, Void, append, bind, const, map, otherwise, pure, unit, ($), (==))
-import Server.Model (Group)
 
 type ChildQuery = Coproduct3 GroupList.Query DataInput.Query DataList.Query
 type ChildSlot = Either3 Unit Unit Unit
