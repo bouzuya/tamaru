@@ -10,7 +10,7 @@ import Bouzuya.DateTime.Instant (toDateTime)
 import Common.Component.DataInput as DataInput
 import Common.Component.DataList as DataList
 import Common.Component.GroupList as GroupList
-import Client.DateTimeFormatter (calendarDateExtendedFormatter)
+import Common.DateTimeFormatter (calendarDateExtendedFormatter)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Now (NOW, now)

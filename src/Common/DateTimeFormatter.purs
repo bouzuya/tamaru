@@ -1,4 +1,4 @@
-module Client.DateTimeFormatter
+module Common.DateTimeFormatter
   ( calendarDateBasicFormatter
   , calendarDateExtendedFormatter
   , calendarDateFormatter
