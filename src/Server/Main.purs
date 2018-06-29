@@ -13,12 +13,11 @@ import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import Data.Either (Either(..))
 import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
-import Data.String (Pattern(..), Replacement(..))
-import Data.String as String
 import Node.Process (PROCESS, lookupEnv)
 import Prelude (Unit, bind, pure, ($), (<$>))
 import Server.Action (handleAction)
-import Server.DB (Context, Config)
+import Server.Config (loadConfig)
+import Server.DB (Context)
 import Server.Path (normalizePath, parsePath')
 import Server.Response (response200, response302, response404)
 import Server.Route (route)
@@ -52,15 +51,6 @@ onRequest context request@{ method, pathname } = do
 
 onListen :: forall e. Eff (console :: CONSOLE | e) Unit
 onListen = log "listening..."
-
-loadConfig :: forall e. Eff (process :: PROCESS | e) (Maybe Config)
-loadConfig = runMaybeT do
-  googleApiClientEmail <- MaybeT $ lookupEnv "TAMARU_GOOGLE_API_CLIENT_EMAIL"
-  googleApiPrivateKey' <- MaybeT $ lookupEnv "TAMARU_GOOGLE_API_PRIVATE_KEY"
-  spreadsheetId <- MaybeT $ lookupEnv "TAMARU_SPREADSHEET_ID"
-  googleApiPrivateKey <- pure $
-    String.replaceAll (Pattern "\\n") (Replacement "\n") googleApiPrivateKey'
-  pure { googleApiClientEmail, googleApiPrivateKey, spreadsheetId }
 
 main
   :: forall e
