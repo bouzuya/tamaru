@@ -13,10 +13,10 @@ import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import Data.Either (Either(..))
 import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
-import Node.Process (PROCESS, lookupEnv)
+import Node.Process (lookupEnv)
 import Prelude (Unit, bind, pure, ($), (<$>))
 import Server.Action (handleAction)
-import Server.Config (loadConfig)
+import Server.Config as Config
 import Server.DB (Context)
 import Server.Path (normalizePath, parsePath')
 import Server.Response (response200, response302, response404)
@@ -57,16 +57,18 @@ main
   . Eff
     (ServerEff
       (StaticEff
-        ( console :: CONSOLE
-        , exception :: EXCEPTION
-        , process :: PROCESS
-        , ref :: REF
-        | e)
+        (Config.Effect
+          ( console :: CONSOLE
+          , exception :: EXCEPTION
+          , ref :: REF
+          | e
+          )
+        )
       )
     )
     Unit
 main = launchAff_ do
-  configMaybe <- liftEff loadConfig
+  configMaybe <- liftEff Config.loadConfig
   config <- liftEff $ maybe (throw "INVALID ENV") pure configMaybe
   db <-
     getGroupList

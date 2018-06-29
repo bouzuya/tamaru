@@ -1,5 +1,7 @@
 module Server.Config
-  (loadConfig) where
+  ( Effect
+  , loadConfig
+  ) where
 
 import Control.Monad.Eff (Eff)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
@@ -10,7 +12,9 @@ import Node.Process (PROCESS, lookupEnv)
 import Prelude (bind, pure, ($))
 import Server.DB (Config)
 
-loadConfig :: forall e. Eff (process :: PROCESS | e) (Maybe Config)
+type Effect e = (process :: PROCESS | e)
+
+loadConfig :: forall e. Eff (Effect e) (Maybe Config)
 loadConfig = runMaybeT do
   googleApiClientEmail <- MaybeT $ lookupEnv "TAMARU_GOOGLE_API_CLIENT_EMAIL"
   googleApiPrivateKey' <- MaybeT $ lookupEnv "TAMARU_GOOGLE_API_PRIVATE_KEY"
