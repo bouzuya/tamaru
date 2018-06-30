@@ -10,8 +10,11 @@ import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Exception (EXCEPTION, throw)
 import Control.Monad.Eff.Ref (REF, newRef)
 import Data.Either (Either(..))
+import Data.Foldable (elem, find)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
-import Prelude (Unit, bind, pure, ($))
+import Data.String as String
+import Data.Tuple (Tuple(..), fst, snd)
+import Prelude (Unit, bind, map, pure, ($))
 import Server.Action (handleAction)
 import Server.Config as Config
 import Server.DB (Context)
@@ -35,6 +38,33 @@ type Effect e =
     )
   )
 
+type Extension = String -- ".html"
+type ExtensionWithoutPeriod = String -- "html"
+type MimeType = String -- "text/html"
+
+type MimeTypeRecord = Tuple MimeType (Array ExtensionWithoutPeriod)
+
+lookupMimeType :: Extension -> Array MimeTypeRecord -> Maybe MimeType
+lookupMimeType extension records = do
+  e <- getExtensionWithoutPeriod extension
+  found <- find (match e) records
+  pure (fst found)
+  where
+  getExtensionWithoutPeriod :: Extension -> Maybe ExtensionWithoutPeriod
+  getExtensionWithoutPeriod e = map _.after (String.splitAt 1 e)
+  match :: ExtensionWithoutPeriod -> MimeTypeRecord -> Boolean
+  match e record = elem e (snd record)
+
+mimeTypeRecords :: Array MimeTypeRecord
+mimeTypeRecords =
+  [ Tuple "application/javascript" ["js"]
+  , Tuple "image/jpeg" ["jpeg", "jpg"]
+  , Tuple "image/png" ["png"]
+  , Tuple "text/css" ["css"]
+  , Tuple "text/html" ["html"]
+  , Tuple "text/plain" ["txt"]
+  ]
+
 onRequest
   :: forall e
   . Context
@@ -50,8 +80,16 @@ onRequest context request@{ method, pathname } = do
       match <- liftEff $ staticRoute "public" (normalizePath parsedPath)
       case match of
         Just static ->
-          -- TODO: fix mime type
-          pure (response200 "application/javascript" (StaticView static))
+          let
+            -- TODO: get extension
+            extension = ".js"
+            defaultMimeType = "application/octet-stream"
+            mimeType =
+              fromMaybe
+                defaultMimeType
+                (lookupMimeType extension mimeTypeRecords)
+          in
+          pure (response200 mimeType (StaticView static))
         Nothing ->
           case route method parsedPath of
             Nothing ->
