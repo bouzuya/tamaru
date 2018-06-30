@@ -9,12 +9,9 @@ import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Exception (EXCEPTION, throw)
 import Control.Monad.Eff.Ref (REF, newRef)
-import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import Data.Either (Either(..))
-import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
-import Node.Process (lookupEnv)
-import Prelude (Unit, bind, pure, ($), (<$>))
+import Prelude (Unit, bind, pure, ($))
 import Server.Action (handleAction)
 import Server.Config as Config
 import Server.DB (Context)
@@ -76,8 +73,6 @@ main = launchAff_ do
       config.googleApiPrivateKey
       config.spreadsheetId
   context <- liftEff $ newRef { config, db }
-  port <- fromMaybe 3000 <$> runMaybeT do
-    portString <- MaybeT $ liftEff $ lookupEnv "PORT"
-    MaybeT $ liftEff $ pure $ Int.fromString portString
+  port <- pure $ fromMaybe 3000 config.port
   let serverOptions = { hostname: "0.0.0.0", port }
   liftEff $ run serverOptions onListen (onRequest context)

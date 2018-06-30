@@ -24,6 +24,7 @@ import Server.Sheets (addData) as Sheets
 type Config =
   { googleApiClientEmail :: String
   , googleApiPrivateKey :: String
+  , port :: Maybe Int
   , spreadsheetId :: String
   }
 type Context = Ref { config :: Config,  db :: (Array Group) }
