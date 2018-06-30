@@ -30,8 +30,8 @@ staticRoute
   -> String
   -> Eff (StaticEff e) (Maybe String)
 staticRoute dir path
-  | Path.isAbsolute path = runMaybeT do
-      let localPath = Path.concat [dir, path]
+  | Path.isAbsolute (Path.normalize path) = runMaybeT do
+      let localPath = Path.concat [dir, (Path.normalize path)]
       exists <- lift $ FS.exists localPath
       _ <- MaybeT $ pure $ guard exists (Just localPath)
       stat <- lift $ FS.stat localPath
