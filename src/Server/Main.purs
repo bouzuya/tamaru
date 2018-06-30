@@ -22,6 +22,19 @@ import Server.Sheets (getGroupList)
 import Server.Static (staticRoute, StaticEff)
 import Server.View (View(..))
 
+type Effect e =
+  (ServerEff
+    (StaticEff
+      (Config.Effect
+        ( console :: CONSOLE
+        , exception :: EXCEPTION
+        , ref :: REF
+        | e
+        )
+      )
+    )
+  )
+
 onRequest
   :: forall e
   . Context
@@ -49,21 +62,7 @@ onRequest context request@{ method, pathname } = do
 onListen :: forall e. Eff (console :: CONSOLE | e) Unit
 onListen = log "listening..."
 
-main
-  :: forall e
-  . Eff
-    (ServerEff
-      (StaticEff
-        (Config.Effect
-          ( console :: CONSOLE
-          , exception :: EXCEPTION
-          , ref :: REF
-          | e
-          )
-        )
-      )
-    )
-    Unit
+main :: forall e. Eff (Effect e) Unit
 main = launchAff_ do
   configMaybe <- liftEff Config.loadConfig
   config <- liftEff $ maybe (throw "INVALID ENV") pure configMaybe
