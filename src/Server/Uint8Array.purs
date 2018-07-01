@@ -18,7 +18,7 @@ type Effect e = (buffer :: Buffer.BUFFER | e)
 fromBuffer :: forall e. Buffer.Buffer -> Eff (Effect e) Uint8Array
 fromBuffer b = do
   a' <- Buffer.toArray b
-  pure (unsafeCoerce a' :: Uint8Array)
+  pure (fromArrayOctet a')
 
 fromString :: forall e. String -> Eff (Effect e) Uint8Array
 fromString s = do
@@ -26,9 +26,15 @@ fromString s = do
   fromBuffer b
 
 toBuffer :: forall e. Uint8Array -> Eff (Effect e) Buffer.Buffer
-toBuffer a = Buffer.fromArray (unsafeCoerce a :: Array Buffer.Octet)
+toBuffer a = Buffer.fromArray (toArrayOctet a)
 
 toString :: forall e. Uint8Array -> Eff (Effect e) String
 toString a = do
   b <- toBuffer a
   Buffer.toString Encoding.UTF8 b
+
+fromArrayOctet :: Array Buffer.Octet -> Uint8Array
+fromArrayOctet = unsafeCoerce
+
+toArrayOctet :: Uint8Array -> Array Buffer.Octet
+toArrayOctet = unsafeCoerce
