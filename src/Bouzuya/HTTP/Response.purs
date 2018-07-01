@@ -4,9 +4,10 @@ module Bouzuya.HTTP.Response
 
 import Bouzuya.HTTP.Header (Header)
 import Bouzuya.HTTP.StatusCode (StatusCode)
+import Data.ArrayBuffer.Types (Uint8Array)
 
 type Response =
-  { body :: String
+  { body :: Uint8Array
   , headers :: Array Header
   , status :: StatusCode
   }

@@ -11,6 +11,7 @@ import Bouzuya.HTTP.Server.Node (ServerEff)
 import Bouzuya.Halogen.StringRenderer (render)
 import Common.Component.ServerRoot (serverRoot)
 import Control.Monad.Aff (Aff)
+import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Ref (REF)
 import Data.Argonaut (decodeJson, jsonParser)
 import Data.Either (either)
@@ -20,6 +21,7 @@ import Prelude (class Show, bind, const, pure, ($), (<>), (=<<))
 import Server.DB (Context, addData, findDataAllByGroupId, findDataByGroupIdAndDataId, findGroupAll, findGroupById)
 import Server.Response (response200, response400, response404, response500)
 import Server.View (View(..))
+import Server.View as View
 
 type GroupIdLike = String
 type DataIdLike = String
@@ -46,15 +48,15 @@ handleAction
   . Context
   -> Action
   -> Request
-  -> Aff (ServerEff (ref :: REF | e)) Response
+  -> Aff (ServerEff (View.Effect (ref :: REF | e))) Response
 handleAction context GetIndex _ = do
   groupList <- findGroupAll context
   view <- pure (IndexView (render serverRoot { groupList }))
-  pure $ response200 "text/html" view
+  liftEff $ response200 "text/html" view
 handleAction context GetGroupList _ = do
   groups <- findGroupAll context
   view <- pure $ GroupListView groups
-  pure $ response200 "application/json" view
+  liftEff $ response200 "application/json" view
 handleAction context (GetGroup groupId) _ = do
   groupMaybe <- findGroupById context groupId
   case groupMaybe of
@@ -62,7 +64,7 @@ handleAction context (GetGroup groupId) _ = do
       pure response404
     Just group -> do
       view <- pure $ GroupView group
-      pure $ response200 "application/json" view
+      liftEff $ response200 "application/json" view
 handleAction context (GetGroupDataList groupId) _ = do
   allDataMaybe <- findDataAllByGroupId context groupId
   case allDataMaybe of
@@ -70,7 +72,7 @@ handleAction context (GetGroupDataList groupId) _ = do
       pure response404
     Just allData -> do
       view <- pure $ DataListView allData
-      pure $ response200 "application/json" view
+      liftEff $ response200 "application/json" view
 handleAction context (UpdateGroupData groupId) { body } = do
   paramsMaybe <- pure do
     m <- either (const Nothing) Just $ decodeJson =<< jsonParser body
@@ -92,7 +94,7 @@ handleAction context (UpdateGroupData groupId) { body } = do
               pure response500
             Just d -> do
               view <- pure $ DataView d
-              pure $ response200 "application/json" view
+              liftEff $ response200 "application/json" view
 handleAction context (GetGroupData groupId dataId) _ = do
   dataMaybe <- findDataByGroupIdAndDataId context groupId dataId
   case dataMaybe of
@@ -100,4 +102,4 @@ handleAction context (GetGroupData groupId dataId) _ = do
       pure response404
     Just d -> do
       view <- pure $ DataView d
-      pure $ response200 "application/json" view
+      liftEff $ response200 "application/json" view

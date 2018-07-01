@@ -9,9 +9,11 @@ module Server.Response
 import Bouzuya.HTTP.Header (Header)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.StatusCode (status200, status302, status400, status404, status500)
-import Data.Show (show)
+import Control.Monad.Eff (Eff)
 import Data.Tuple (Tuple(..))
-import Server.View (View)
+import Prelude (bind, pure)
+import Server.Uint8Array as Uint8Array
+import Server.View (Effect, View, toUint8Array)
 
 -- Header helpers
 
@@ -23,37 +25,39 @@ location = Tuple "Location"
 
 -- Response helpers
 
-response200 :: String -> View -> Response
-response200 viewType view =
-  { body: show view
-  , headers: [contentType viewType]
-  , status: status200
-  }
+response200 :: forall e. String -> View -> Eff (Effect e) Response
+response200 viewType view = do
+  body <- toUint8Array view
+  pure
+    { body
+    , headers: [contentType viewType]
+    , status: status200
+    }
 
 response302 :: String -> Response
 response302 loc =
-  { body: ""
+  { body: Uint8Array.empty
   , headers: [location loc]
   , status: status302
   }
 
 response400 :: Response
 response400 =
-  { body: ""
+  { body: Uint8Array.empty
   , headers: [contentType "text/plain"]
   , status: status400
   }
 
 response404 :: Response
 response404 =
-  { body: ""
+  { body: Uint8Array.empty
   , headers: [contentType "text/plain"]
   , status: status404
   }
 
 response500 :: Response
 response500 =
-  { body: ""
+  { body: Uint8Array.empty
   , headers: [contentType "text/plain"]
   , status: status500
   }

@@ -34,8 +34,10 @@ import Node.HTTP as HTTP
 import Node.Stream as Stream
 import Node.URL as URL
 import Prelude (Unit, bind, map, pure, unit, ($), (<>), (>>>))
+import Server.Uint8Array as Uint8Array
 
 type ServerEff e =
+  Uint8Array.Effect
   ( avar :: AVAR
   , buffer :: BUFFER
   , dom :: DOM
@@ -130,11 +132,15 @@ readRequest request = do
     }
 
 writeResponse
-  :: forall e. HTTP.Response -> Response -> Eff (http :: HTTP.HTTP | e) Unit
+  :: forall e
+  . HTTP.Response
+  -> Response
+  -> Eff (Uint8Array.Effect (http :: HTTP.HTTP | e)) Unit
 writeResponse response { body, headers, status } = do
   _ <- setStatusCode response status
   _ <- setHeaders response headers
-  setBody response body
+  s <- Uint8Array.toString body
+  setBody response s
 
 handleRequest
   :: forall e

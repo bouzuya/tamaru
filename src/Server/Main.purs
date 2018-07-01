@@ -87,7 +87,7 @@ onRequest context request@{ method, pathname } = do
                 defaultMimeType
                 (lookupMimeType extension mimeTypeRecords)
           in
-          pure (response200 mimeType (StaticView dataAsString))
+          liftEff $ response200 mimeType (StaticView dataAsString)
         Nothing ->
           case route method parsedPath of
             Nothing ->
