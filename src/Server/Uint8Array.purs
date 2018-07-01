@@ -1,5 +1,6 @@
 module Server.Uint8Array
   ( Effect
+  , empty
   , fromBuffer
   , fromString
   , toBuffer
@@ -14,6 +15,9 @@ import Prelude (bind, pure)
 import Unsafe.Coerce (unsafeCoerce)
 
 type Effect e = (buffer :: Buffer.BUFFER | e)
+
+empty :: Uint8Array
+empty = fromArrayOctet []
 
 fromBuffer :: forall e. Buffer.Buffer -> Eff (Effect e) Uint8Array
 fromBuffer b = do
