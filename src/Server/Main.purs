@@ -22,12 +22,12 @@ import Server.Path (normalizePath, parsePath')
 import Server.Response (response200, response302, response404)
 import Server.Route (route)
 import Server.Sheets (getGroupList)
-import Server.Static (staticRoute, StaticEff)
+import Server.Static as Static
 import Server.View (View(..))
 
 type Effect e =
   (ServerEff
-    (StaticEff
+    (Static.Effect
       (Config.Effect
         ( console :: CONSOLE
         , exception :: EXCEPTION
@@ -70,16 +70,16 @@ onRequest
   . Context
   -> Request
   -> Aff
-    (ServerEff (StaticEff (ref :: REF | e)))
+    (ServerEff (Static.Effect (ref :: REF | e)))
     Response
 onRequest context request@{ method, pathname } = do
   case parsePath' pathname of
     Left location ->
       pure $ response302 location
     Right parsedPath -> do
-      match <- liftEff $ staticRoute "public" (normalizePath parsedPath)
+      match <- liftEff $ Static.staticRoute "public" (normalizePath parsedPath)
       case match of
-        Just { dataAsString, extension } ->
+        Just { binary, extension } ->
           let
             defaultMimeType = "application/octet-stream"
             mimeType =
@@ -87,7 +87,7 @@ onRequest context request@{ method, pathname } = do
                 defaultMimeType
                 (lookupMimeType extension mimeTypeRecords)
           in
-          liftEff $ response200 mimeType (StaticView dataAsString)
+          liftEff $ response200 mimeType (StaticView binary)
         Nothing ->
           case route method parsedPath of
             Nothing ->

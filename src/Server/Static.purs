@@ -1,23 +1,23 @@
 module Server.Static
-  ( StaticEff
+  ( Effect
   , staticRoute
   ) where
 
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Maybe.Trans (MaybeT(..), lift, runMaybeT)
+import Data.ArrayBuffer.Types (Uint8Array)
 import Data.Maybe (Maybe(..))
 import Data.Monoid (guard)
 import Node.Buffer (BUFFER)
-import Node.Buffer as Buffer
-import Node.Encoding as Encoding
 import Node.FS (FS)
 import Node.FS.Stats as Stats
 import Node.FS.Sync as FS
 import Node.Path as Path
 import Prelude (bind, otherwise, pure, ($))
+import Server.Uint8Array as Uint8Array
 
-type StaticEff e =
+type Effect e =
   ( buffer :: BUFFER
   , exception :: EXCEPTION
   , fs :: FS
@@ -29,9 +29,9 @@ staticRoute
   . String
   -> String
   -> Eff
-    (StaticEff e)
+    (Effect e)
     (Maybe
-      { dataAsString :: String
+      { binary :: Uint8Array
       , extension :: String
       , localPath :: String
       , path :: String
@@ -46,6 +46,6 @@ staticRoute dir path
       stat <- lift $ FS.stat localPath
       fullPath <- MaybeT $ pure $ guard (Stats.isFile stat) (Just localPath)
       buffer <- lift $ FS.readFile fullPath
-      dataAsString <- lift $ Buffer.toString Encoding.UTF8 buffer
-      pure { dataAsString, extension, localPath, path: normalizedPath }
+      binary <- lift $ Uint8Array.fromBuffer buffer
+      pure { binary, extension, localPath, path: normalizedPath }
   | otherwise = pure Nothing

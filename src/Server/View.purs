@@ -12,8 +12,8 @@ import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=))
 import Data.ArrayBuffer.Types (Uint8Array)
 import Data.Function (($))
 import Data.Functor ((<$>))
-import Data.Show (class Show, show)
 import Data.StrMap as StrMap
+import Prelude (pure, show)
 import Server.Uint8Array as Uint8Array
 
 type Effect e = Uint8Array.Effect e
@@ -25,7 +25,7 @@ data View
   | GroupView Group
   | IndexView String
   | RequestView Request
-  | StaticView String
+  | StaticView Uint8Array
 
 instance encodeJsonView :: EncodeJson View where
   encodeJson (DataListView xs) =
@@ -52,14 +52,11 @@ instance encodeJsonView :: EncodeJson View where
         , "query" := encodeJson r.searchParams
         , "body" := r.body
         ]
-  encodeJson (StaticView s) = encodeJson s
-
-instance showView :: Show View where
-  show (IndexView s) = s
-  show (StaticView s) = s
-  show view = Json.stringify $ encodeJson view
+  encodeJson (StaticView _) = encodeJson ""
 
 toUint8Array :: forall e. View -> Eff (Effect e) Uint8Array
+toUint8Array (IndexView s) = Uint8Array.fromString s
+toUint8Array (StaticView b) = pure b
 toUint8Array view = do
-  let s = show view
+  let s = Json.stringify $ encodeJson view
   Uint8Array.fromString s
