@@ -46,7 +46,7 @@ type ServerEff e =
   , ref :: REF
   | e
   )
-type Body = String
+type Body = Buffer.Buffer
 type ServerOptions =
   { hostname :: String
   , port :: Int
@@ -56,7 +56,7 @@ setBody
   :: forall e. HTTP.Response -> Body -> Eff (http :: HTTP.HTTP | e) Unit
 setBody response body = do
   let writable = HTTP.responseAsStream response
-  _ <- Stream.writeString writable Encoding.UTF8 body $ pure unit
+  _ <- Stream.write writable body $ pure unit
   Stream.end writable $ pure unit
 
 setHeader
@@ -139,8 +139,8 @@ writeResponse
 writeResponse response { body, headers, status } = do
   _ <- setStatusCode response status
   _ <- setHeaders response headers
-  s <- Uint8Array.toString body
-  setBody response s
+  b <- Uint8Array.toBuffer body
+  setBody response b
 
 handleRequest
   :: forall e
