@@ -14,7 +14,6 @@ import Data.Foldable (elem, find)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.String as String
 import Data.Tuple (Tuple(..), fst, snd)
-import Node.Path as Path
 import Prelude (Unit, bind, map, pure, ($))
 import Server.Action (handleAction)
 import Server.Config as Config
@@ -80,16 +79,15 @@ onRequest context request@{ method, pathname } = do
     Right parsedPath -> do
       match <- liftEff $ staticRoute "public" (normalizePath parsedPath)
       case match of
-        Just static ->
+        Just { dataAsString, extension } ->
           let
-            extension = Path.extname (normalizePath parsedPath)
             defaultMimeType = "application/octet-stream"
             mimeType =
               fromMaybe
                 defaultMimeType
                 (lookupMimeType extension mimeTypeRecords)
           in
-          pure (response200 mimeType (StaticView static))
+          pure (response200 mimeType (StaticView dataAsString))
         Nothing ->
           case route method parsedPath of
             Nothing ->

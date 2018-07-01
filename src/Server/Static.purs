@@ -28,14 +28,24 @@ staticRoute
   :: forall e
   . String
   -> String
-  -> Eff (StaticEff e) (Maybe String)
+  -> Eff
+    (StaticEff e)
+    (Maybe
+      { dataAsString :: String
+      , extension :: String
+      , localPath :: String
+      , path :: String
+      })
 staticRoute dir path
   | Path.isAbsolute (Path.normalize path) = runMaybeT do
-      let localPath = Path.concat [dir, (Path.normalize path)]
+      let normalizedPath = Path.normalize path
+      let extension = Path.extname normalizedPath
+      let localPath = Path.concat [dir, normalizedPath]
       exists <- lift $ FS.exists localPath
       _ <- MaybeT $ pure $ guard exists (Just localPath)
       stat <- lift $ FS.stat localPath
       fullPath <- MaybeT $ pure $ guard (Stats.isFile stat) (Just localPath)
       buffer <- lift $ FS.readFile fullPath
-      lift $ Buffer.toString Encoding.UTF8 buffer
+      dataAsString <- lift $ Buffer.toString Encoding.UTF8 buffer
+      pure { dataAsString, extension, localPath, path: normalizedPath }
   | otherwise = pure Nothing
