@@ -14,6 +14,7 @@ import Data.Foldable (elem, find)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.String as String
 import Data.Tuple (Tuple(..), fst, snd)
+import Node.Path as Path
 import Prelude (Unit, bind, map, pure, ($))
 import Server.Action (handleAction)
 import Server.Config as Config
@@ -81,8 +82,7 @@ onRequest context request@{ method, pathname } = do
       case match of
         Just static ->
           let
-            -- TODO: get extension
-            extension = ".js"
+            extension = Path.extname (normalizePath parsedPath)
             defaultMimeType = "application/octet-stream"
             mimeType =
               fromMaybe
