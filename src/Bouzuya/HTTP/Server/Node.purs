@@ -1,6 +1,5 @@
 module Bouzuya.HTTP.Server.Node
-  ( Body
-  , ServerEff
+  ( Effect
   , run
   ) where
 
@@ -36,7 +35,7 @@ import Node.URL as URL
 import Prelude (Unit, bind, map, pure, unit, ($), (<>), (>>>))
 import Server.Uint8Array as Uint8Array
 
-type ServerEff e =
+type Effect e =
   Uint8Array.Effect
   ( avar :: AVAR
   , buffer :: BUFFER
@@ -78,7 +77,7 @@ setStatusCode response (StatusCode code message) = do
 readBody
   :: forall e
   . HTTP.Request
-  -> Aff (ServerEff e) String
+  -> Aff (Effect e) String
 readBody request = do
   let readable = HTTP.requestAsStream request
   bv <- AVar.makeEmptyVar
@@ -99,7 +98,7 @@ readBody request = do
 readRequest
   :: forall e
   . HTTP.Request
-  -> Aff (ServerEff e) Request
+  -> Aff (Effect e) Request
 readRequest request = do
   let
     headers = HTTP.requestHeaders request
@@ -144,10 +143,10 @@ writeResponse response { body, headers, status } = do
 
 handleRequest
   :: forall e
-  . (Request -> Aff (ServerEff e) Response)
+  . (Request -> Aff (Effect e) Response)
   -> HTTP.Request
   -> HTTP.Response
-  -> Eff (ServerEff e) Unit
+  -> Eff (Effect e) Unit
 handleRequest onRequest request response = Aff.launchAff_ do
   req <- readRequest request
   res <- onRequest req
@@ -156,9 +155,9 @@ handleRequest onRequest request response = Aff.launchAff_ do
 run
   :: forall e
   . ServerOptions
-  -> Eff (ServerEff e) Unit
-  -> (Request -> Aff (ServerEff e) Response)
-  -> Eff (ServerEff e) Unit
+  -> Eff (Effect e) Unit
+  -> (Request -> Aff (Effect e) Response)
+  -> Eff (Effect e) Unit
 run { hostname, port } onListen onRequest = do
   server <- HTTP.createServer (handleRequest onRequest)
   let

@@ -7,7 +7,7 @@ module Server.Action
 
 import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
-import Bouzuya.HTTP.Server.Node (ServerEff)
+import Bouzuya.HTTP.Server (Effect)
 import Bouzuya.Halogen.StringRenderer (render)
 import Common.Component.ServerRoot (serverRoot)
 import Control.Monad.Aff (Aff)
@@ -48,7 +48,7 @@ handleAction
   . Context
   -> Action
   -> Request
-  -> Aff (ServerEff (View.Effect (ref :: REF | e))) Response
+  -> Aff (Effect (View.Effect (ref :: REF | e))) Response
 handleAction context GetIndex _ = do
   groupList <- findGroupAll context
   view <- pure (IndexView (render serverRoot { groupList }))

@@ -2,7 +2,7 @@ module Server.Main (main) where
 
 import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
-import Bouzuya.HTTP.Server.Node (ServerEff, run)
+import Bouzuya.HTTP.Server as Server
 import Control.Monad.Aff (Aff, launchAff_)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
@@ -26,7 +26,7 @@ import Server.Static as Static
 import Server.View (View(..))
 
 type Effect e =
-  (ServerEff
+  (Server.Effect
     (Static.Effect
       (Config.Effect
         ( console :: CONSOLE
@@ -70,7 +70,7 @@ onRequest
   . Context
   -> Request
   -> Aff
-    (ServerEff (Static.Effect (ref :: REF | e)))
+    (Server.Effect (Static.Effect (ref :: REF | e)))
     Response
 onRequest context request@{ method, pathname } = do
   case parsePath' pathname of
@@ -110,4 +110,4 @@ main = launchAff_ do
   context <- liftEff $ newRef { config, db }
   port <- pure $ fromMaybe 3000 config.port
   let serverOptions = { hostname: "0.0.0.0", port }
-  liftEff $ run serverOptions onListen (onRequest context)
+  liftEff $ Server.run serverOptions onListen (onRequest context)
