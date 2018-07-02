@@ -24,6 +24,7 @@ import Server.Sheets (addData) as Sheets
 type Config =
   { googleApiClientEmail :: String
   , googleApiPrivateKey :: String
+  , hostname :: Maybe String
   , port :: Maybe Int
   , spreadsheetId :: String
   }

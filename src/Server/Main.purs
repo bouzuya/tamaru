@@ -87,7 +87,7 @@ onRequest context request@{ method, pathname } = do
                 defaultMimeType
                 (lookupMimeType extension mimeTypeRecords)
           in
-          liftEff $ response200 mimeType (StaticView binary)
+            liftEff $ response200 mimeType (StaticView binary)
         Nothing ->
           case route method parsedPath of
             Nothing ->
@@ -109,5 +109,6 @@ main = launchAff_ do
       config.spreadsheetId
   context <- liftEff $ newRef { config, db }
   port <- pure $ fromMaybe 3000 config.port
-  let serverOptions = { hostname: "0.0.0.0", port }
+  hostname <- pure $ fromMaybe "0.0.0.0" config.hostname
+  let serverOptions = { hostname, port }
   liftEff $ Server.run serverOptions onListen (onRequest context)

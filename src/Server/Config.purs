@@ -31,5 +31,6 @@ loadConfig = runMaybeT do
   spreadsheetId <- MaybeT $ loadString "TAMARU_SPREADSHEET_ID"
   googleApiPrivateKey <- pure $
     String.replaceAll (Pattern "\\n") (Replacement "\n") googleApiPrivateKey'
+  hostname <- map Just $ MaybeT $ loadString "HOSTNAME"
   port <- map Just $ MaybeT $ loadInt "PORT"
-  pure { googleApiClientEmail, googleApiPrivateKey, port, spreadsheetId }
+  pure { googleApiClientEmail, googleApiPrivateKey, hostname, port, spreadsheetId }
