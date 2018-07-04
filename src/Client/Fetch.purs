@@ -26,10 +26,10 @@ foreign import fetchImpl
   . Foreign
   -> Eff (Effect e) (Promise FetchResponse)
 
-foreign import jsonImpl
+foreign import textImpl
   :: forall e
   . FetchResponse
-  -> Eff (Effect e) (Promise Foreign)
+  -> Eff (Effect e) (Promise String)
 
 foreign import statusImpl :: FetchResponse -> Int
 
@@ -41,13 +41,13 @@ fetch' opts = do
 fetch
   :: forall e
   . Options FetchOptions
-  -> Aff (Effect e) { body :: Maybe Foreign, status :: Int }
+  -> Aff (Effect e) { body :: Maybe String, status :: Int }
 fetch opts = do
   response <- fetch' opts
   let status = statusImpl response
   if eq status 204
     then pure { body: Nothing, status }
     else do
-      promise <- liftEff (jsonImpl response)
+      promise <- liftEff (textImpl response)
       b <- Promise.toAff promise
       pure { body: Just b, status }

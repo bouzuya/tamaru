@@ -10,9 +10,9 @@ exports.fetchImpl = function (options) {
   };
 };
 
-exports.jsonImpl = function (response) {
+exports.textImpl = function (response) {
   return function () {
-    return response.json();
+    return response.text();
   };
 };
 
