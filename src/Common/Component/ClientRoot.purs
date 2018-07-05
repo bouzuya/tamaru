@@ -7,6 +7,7 @@ module Common.Component.ClientRoot
   ) where
 
 import Bouzuya.DateTime.Instant (toDateTime)
+import Client.Request as Request
 import Common.Component.DataInput as DataInput
 import Common.Component.DataList as DataList
 import Common.Component.GroupList as GroupList
@@ -47,7 +48,7 @@ data Query a
   | Noop a
 type Input = { groupList :: Array Group } -- input value
 type Output = Void -- output message
-type Effect e = (dom :: DOM, now :: NOW | e)
+type Effect e = Request.Effect (dom :: DOM, now :: NOW | e)
 
 today :: forall e. Eff (now :: NOW | e) String
 today
@@ -86,6 +87,7 @@ clientRoot =
         case selectedGroup of
           Nothing -> pure next
           Just group -> do
+            _ <- lift $ Request.addData group.id { id, value }
             _ <- runMaybeT do
               let
                 newData = upsert (\i -> i.id == id) { id, value } group.data
