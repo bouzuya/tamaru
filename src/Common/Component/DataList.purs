@@ -43,6 +43,7 @@ dataList =
         HH.li
         [ HP.classes [ ClassName "data-list-item" ] ]
         [ HH.span [ HP.classes [ ClassName "id" ] ] [ HH.text d.id ]
+        , HH.span [ HP.classes [ ClassName "separator" ] ] [ HH.text " " ]
         , HH.span [ HP.classes [ ClassName "value" ] ] [ HH.text d.value ]
         ]
       )
