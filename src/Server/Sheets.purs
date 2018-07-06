@@ -1,8 +1,8 @@
 module Server.Sheets
   ( Key
   , SpreadsheetId
-  , addData
   , getGroupList
+  , setRows
   ) where
 
 import Common.Model (Data, GroupId, Group)
@@ -13,15 +13,11 @@ import Control.Monad.Eff.Class (liftEff)
 import Control.Promise (Promise)
 import Control.Promise as Promise
 import Data.Array (catMaybes)
-import Data.Array as Array
-import Data.Eq ((==))
 import Data.Function (($))
-import Data.Int as Int
 import Data.Maybe (Maybe(..))
 import Data.Semigroup ((<>))
-import Data.Semiring ((+))
 import Data.Traversable (sequence)
-import Data.Unit (Unit)
+import Data.Unit (Unit, unit)
 
 type ClientEmail = String
 type PrivateKey = String
@@ -93,23 +89,16 @@ getGroupList clientEmail privateKey spreadsheetId = do
       dataList <- getDataList e k s groupId
       pure { id: groupId, data: dataList }
 
-addData
+setRows
   :: forall e
   . ClientEmail
   -> PrivateKey
   -> SpreadsheetId
-  -> Group
-  -> Data
-  -> Aff e Data
-addData clientEmail privateKey spreadsheetId group { id, value } = do
-  let
-    position =
-      case Array.findIndex (\{ id: id' } -> id == id') group.data of
-        Nothing -> (Array.length group.data) + 1
-        Just index -> index + 1
-    rowNumber = Int.toStringAs Int.decimal position
-    range = group.id <> "!A" <> rowNumber <> ":" <> "B" <> rowNumber
-    rows = [[id, value]]
-    eff = setRowsImpl clientEmail privateKey spreadsheetId range rows
-  _ <- liftEff eff >>= Promise.toAff
-  pure { id, value }
+  -> Range
+  -> Array Row
+  -> Aff e Unit
+setRows clientEmail privateKey spreadsheetId range rows = do
+  let eff = setRowsImpl clientEmail privateKey spreadsheetId range rows
+  promise <- liftEff eff
+  _ <- Promise.toAff promise
+  pure unit

@@ -9,17 +9,17 @@ module Server.DB
   ) where
 
 import Common.Model (Data, Group, GroupId, DataId)
-import Control.Bind (bind, pure, (<$>), (>>=))
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Ref (REF, Ref, readRef, writeRef)
 import Data.Array as Array
 import Data.Eq ((==))
 import Data.Foldable (find)
-import Data.Function (($))
+import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Semigroup ((<>))
-import Server.Sheets (addData) as Sheets
+import Prelude (bind, pure, ($), (+), (<$>), (>>=))
+import Server.Sheets as Sheets
 
 type Config =
   { googleApiClientEmail :: String
@@ -49,13 +49,21 @@ addData context groupId d = do
   case findGroupById' db' groupId of
     Nothing -> pure Nothing
     Just group -> do
-      d' <- Sheets.addData
+      let
+        position =
+          case Array.findIndex (\{ id: id' } -> d.id == id') group.data of
+            Nothing -> (Array.length group.data) + 1
+            Just index -> index + 1
+        rowNumber = Int.toStringAs Int.decimal position
+        range = group.id <> "!A" <> rowNumber <> ":" <> "B" <> rowNumber
+        rows = [[d.id, d.value]]
+      _ <- Sheets.setRows
         googleApiClientEmail
         googleApiPrivateKey
         spreadsheetId
-        group
-        d
-      pure $ Just d'
+        range
+        rows
+      pure $ Just d
 
 addData' :: Array Group -> GroupId -> Data -> Array Group
 addData' db groupId d = fromMaybe db do
