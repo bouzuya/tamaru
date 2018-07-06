@@ -46,5 +46,5 @@ dataList =
         , HH.span [ HP.classes [ ClassName "value" ] ] [ HH.text d.value ]
         ]
       )
-      (Array.take 7 state.dataList)
+      (Array.take 7 (Array.reverse state.dataList))
     )
