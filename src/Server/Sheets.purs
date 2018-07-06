@@ -6,7 +6,7 @@ module Server.Sheets
   ) where
 
 import Common.Model (Data, GroupId, Group)
-import Control.Bind (bind, pure, (<$>), (>>=))
+import Control.Bind (bind, pure, (<$>))
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
@@ -19,6 +19,10 @@ import Data.Semigroup ((<>))
 import Data.Traversable (sequence)
 import Data.Unit (Unit, unit)
 
+type SheetsCredentials =
+  { clientEmail :: ClientEmail
+  , privateKey :: PrivateKey
+  }
 type ClientEmail = String
 type PrivateKey = String
 type Key = String
@@ -50,16 +54,16 @@ foreign import setRowsImpl
 
 getDataList
   :: forall e
-  . ClientEmail
-  -> PrivateKey
+  . SheetsCredentials
   -> SpreadsheetId
   -> GroupId
   -> Aff e (Array Data)
-getDataList clientEmail privateKey spreadsheetId groupId = do
+getDataList { clientEmail, privateKey } spreadsheetId groupId = do
   let
     range = groupId <> "!A:B"
     eff = getRowsImpl clientEmail privateKey spreadsheetId range
-  rows <- liftEff eff >>= Promise.toAff
+  promise <- liftEff eff
+  rows <- Promise.toAff promise
   pure $ catMaybes (toData <$> rows)
   where
     toData [id, value] = Just { id, value }
@@ -67,37 +71,35 @@ getDataList clientEmail privateKey spreadsheetId groupId = do
 
 getGroupIdList
   :: forall e
-  . ClientEmail
-  -> PrivateKey
+  . SheetsCredentials
   -> SpreadsheetId
   -> Aff e (Array GroupId)
-getGroupIdList clientEmail privateKey spreadsheetId = do
+getGroupIdList { clientEmail, privateKey } spreadsheetId = do
   let eff = getSheetTitlesImpl clientEmail privateKey spreadsheetId
-  liftEff eff >>= Promise.toAff
+  promise <- liftEff eff
+  Promise.toAff promise
 
 getGroupList
   :: forall e
-  . ClientEmail
-  -> PrivateKey
+  . SheetsCredentials
   -> SpreadsheetId
   -> Aff e (Array Group)
-getGroupList clientEmail privateKey spreadsheetId = do
-  groupIds <- getGroupIdList clientEmail privateKey spreadsheetId
-  sequence $ (getGroup clientEmail privateKey spreadsheetId) <$> groupIds
+getGroupList credentials@{ clientEmail, privateKey } spreadsheetId = do
+  groupIds <- getGroupIdList credentials spreadsheetId
+  sequence $ (getGroup credentials spreadsheetId) <$> groupIds
   where
-    getGroup e k s groupId = do
-      dataList <- getDataList e k s groupId
+    getGroup c s groupId = do
+      dataList <- getDataList c s groupId
       pure { id: groupId, data: dataList }
 
 setRows
   :: forall e
-  . ClientEmail
-  -> PrivateKey
+  . SheetsCredentials
   -> SpreadsheetId
   -> Range
   -> Array Row
   -> Aff e Unit
-setRows clientEmail privateKey spreadsheetId range rows = do
+setRows { clientEmail, privateKey } spreadsheetId range rows = do
   let eff = setRowsImpl clientEmail privateKey spreadsheetId range rows
   promise <- liftEff eff
   _ <- Promise.toAff promise

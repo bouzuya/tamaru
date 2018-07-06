@@ -58,8 +58,7 @@ addData context groupId d = do
         range = group.id <> "!A" <> rowNumber <> ":" <> "B" <> rowNumber
         rows = [[d.id, d.value]]
       _ <- Sheets.setRows
-        googleApiClientEmail
-        googleApiPrivateKey
+        { clientEmail: googleApiClientEmail, privateKey: googleApiPrivateKey }
         spreadsheetId
         range
         rows

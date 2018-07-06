@@ -104,8 +104,9 @@ main = launchAff_ do
   config <- liftEff $ maybe (throw "INVALID ENV") pure configMaybe
   db <-
     getGroupList
-      config.googleApiClientEmail
-      config.googleApiPrivateKey
+      { clientEmail: config.googleApiClientEmail
+      , privateKey: config.googleApiPrivateKey
+      }
       config.spreadsheetId
   context <- liftEff $ newRef { config, db }
   port <- pure $ fromMaybe 3000 config.port
