@@ -108,7 +108,7 @@ addData clientEmail privateKey spreadsheetId group { id, value } = do
         Nothing -> (Array.length group.data) + 1
         Just index -> index + 1
     rowNumber = Int.toStringAs Int.decimal position
-    range = "A" <> rowNumber <> ":" <> "B" <> rowNumber
+    range = group.id <> "!A" <> rowNumber <> ":" <> "B" <> rowNumber
     rows = [[id, value]]
     eff = setRowsImpl clientEmail privateKey spreadsheetId range rows
   _ <- liftEff eff >>= Promise.toAff
