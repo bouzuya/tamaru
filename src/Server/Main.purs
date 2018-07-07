@@ -14,7 +14,7 @@ import Data.Foldable (elem, find)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.String as String
 import Data.Tuple (Tuple(..), fst, snd)
-import Prelude (Unit, bind, map, pure, ($))
+import Prelude (Unit, bind, map, pure, show, ($), (<>))
 import Server.Action (handleAction)
 import Server.Config as Config
 import Server.DB (Context)
@@ -95,8 +95,14 @@ onRequest context request@{ method, pathname } = do
             Just action ->
               handleAction context action request
 
-onListen :: forall e. Eff (console :: CONSOLE | e) Unit
-onListen = log "listening..."
+onListen
+  :: forall e
+  . { hostname :: String, port :: Int }
+  -> Eff (console :: CONSOLE | e) Unit
+onListen { hostname, port } = do
+  _ <- log "listening..."
+  _ <- log $ "http://" <> hostname <> ":" <> show port
+  log ""
 
 main :: forall e. Eff (Effect e) Unit
 main = launchAff_ do
@@ -112,4 +118,8 @@ main = launchAff_ do
   port <- pure $ fromMaybe 3000 config.port
   hostname <- pure $ fromMaybe "0.0.0.0" config.hostname
   let serverOptions = { hostname, port }
-  liftEff $ Server.run serverOptions onListen (onRequest context)
+  liftEff $
+    Server.run
+      serverOptions
+      (onListen { hostname, port })
+      (onRequest context)
