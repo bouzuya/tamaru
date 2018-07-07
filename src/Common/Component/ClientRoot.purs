@@ -115,9 +115,7 @@ clientRoot =
   render state =
     HH.div
     [ HP.classes [ ClassName "body" ] ]
-    [ HH.p []
-      [ HH.text "body" ]
-    , HH.slot'
+    [ HH.slot'
       CP.cp1
       unit
       GroupList.groupList

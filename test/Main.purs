@@ -44,7 +44,6 @@ main = runTest do
           , "<header><h1>tamaru</h1></header>"
           , "<div class=\"body\">"
           , "<div class=\"body\">"
-          , "<p>body</p>"
           , "<select class=\"group-list\"></select>"
           , "<div class=\"data-input\">"
           , "<form>"
