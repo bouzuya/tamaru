@@ -2,13 +2,14 @@ module Server.Response
   ( response200
   , response302
   , response400
+  , response401
   , response404
   , response500
   ) where
 
 import Bouzuya.HTTP.Header (Header)
 import Bouzuya.HTTP.Response (Response)
-import Bouzuya.HTTP.StatusCode (status200, status302, status400, status404, status500)
+import Bouzuya.HTTP.StatusCode (status200, status302, status400, status401, status404, status500)
 import Control.Monad.Eff (Eff)
 import Data.Tuple (Tuple(..))
 import Prelude (bind, pure)
@@ -46,6 +47,16 @@ response400 =
   { body: Uint8Array.empty
   , headers: [contentType "text/plain"]
   , status: status400
+  }
+
+response401 :: Response
+response401 =
+  { body: Uint8Array.empty
+  , headers:
+    [ contentType "text/plain"
+    , Tuple "WWW-Authenticate" "Basic"
+    ]
+  , status: status401
   }
 
 response404 :: Response
