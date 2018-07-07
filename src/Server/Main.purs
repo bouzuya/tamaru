@@ -11,15 +11,15 @@ import Control.Monad.Eff.Exception (EXCEPTION, throw)
 import Control.Monad.Eff.Ref (REF, newRef)
 import Data.Either (Either(..))
 import Data.Foldable (elem, find)
-import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Maybe (Maybe(..), fromMaybe, isJust, maybe)
 import Data.String as String
 import Data.Tuple (Tuple(..), fst, snd)
-import Prelude (Unit, bind, map, pure, show, ($), (<>))
+import Prelude (Unit, bind, map, otherwise, pure, show, ($), (&&), (<>), (==))
 import Server.Action (handleAction)
 import Server.Config as Config
 import Server.DB (Context)
 import Server.Path (normalizePath, parsePath')
-import Server.Response (response200, response302, response404)
+import Server.Response (response200, response302, response401, response404)
 import Server.Route (route)
 import Server.Sheets (getGroupList)
 import Server.Static as Static
@@ -65,35 +65,46 @@ mimeTypeRecords =
   , Tuple "text/plain" ["txt"]
   ]
 
+isAuthenticated :: Request -> Boolean
+isAuthenticated { headers } =
+  isJust
+    (find
+      (\(Tuple name value) ->
+        name == "authorization"
+        && value == "Basic dXNlcjE6cGFzc3dvcmQx") -- user1:password1
+      headers)
+
 onRequest
   :: forall e
   . Context
   -> Request
   -> Aff
-    (Server.Effect (Static.Effect (ref :: REF | e)))
+    (Server.Effect (Static.Effect (console :: CONSOLE, ref :: REF | e)))
     Response
-onRequest context request@{ method, pathname } = do
-  case parsePath' pathname of
-    Left location ->
-      pure $ response302 location
-    Right parsedPath -> do
-      match <- liftEff $ Static.staticRoute "public" (normalizePath parsedPath)
-      case match of
-        Just { binary, extension } ->
-          let
-            defaultMimeType = "application/octet-stream"
-            mimeType =
-              fromMaybe
-                defaultMimeType
-                (lookupMimeType extension mimeTypeRecords)
-          in
-            liftEff $ response200 mimeType (StaticView binary)
-        Nothing ->
-          case route method parsedPath of
-            Nothing ->
-              pure response404
-            Just action ->
-              handleAction context action request
+onRequest context request@{ headers, method, pathname }
+  | isAuthenticated request = do
+    case parsePath' pathname of
+      Left location ->
+        pure $ response302 location
+      Right parsedPath -> do
+        match <- liftEff $ Static.staticRoute "public" (normalizePath parsedPath)
+        case match of
+          Just { binary, extension } ->
+            let
+              defaultMimeType = "application/octet-stream"
+              mimeType =
+                fromMaybe
+                  defaultMimeType
+                  (lookupMimeType extension mimeTypeRecords)
+            in
+              liftEff $ response200 mimeType (StaticView binary)
+          Nothing ->
+            case route method parsedPath of
+              Nothing ->
+                pure response404
+              Just action ->
+                handleAction context action request
+  | otherwise = pure response401
 
 onListen
   :: forall e
