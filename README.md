@@ -1,5 +1,14 @@
 # tamaru
 
+## How to run
+
+```
+$ cp _env .env
+$ docker build --tag bouzuya/tamaru .
+$ docker run --publish 8080:3000 --env-file .env bouzuya/tamaru
+$ curl http://localhost:8080/
+```
+
 ## Note
 
 - Google Sheets API v4
