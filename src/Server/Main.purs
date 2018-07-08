@@ -14,6 +14,9 @@ import Data.Foldable (elem, find)
 import Data.Maybe (Maybe(..), fromMaybe, isJust, maybe)
 import Data.String as String
 import Data.Tuple (Tuple(..), fst, snd)
+import Node.Buffer (BUFFER)
+import Node.Buffer as Buffer
+import Node.Encoding as Encoding
 import Prelude (Unit, bind, map, otherwise, pure, show, ($), (&&), (<>), (==))
 import Server.Action (handleAction)
 import Server.Config as Config
@@ -44,6 +47,11 @@ type MimeType = String -- "text/html"
 
 type MimeTypeRecord = Tuple MimeType (Array ExtensionWithoutPeriod)
 
+base64encode :: forall e. String -> Eff (buffer :: BUFFER | e) String
+base64encode s = do
+  b <- Buffer.fromString s Encoding.UTF8
+  Buffer.toString Encoding.Base64 b
+
 lookupMimeType :: Extension -> Array MimeTypeRecord -> Maybe MimeType
 lookupMimeType extension records = do
   e <- getExtensionWithoutPeriod extension
@@ -65,24 +73,25 @@ mimeTypeRecords =
   , Tuple "text/plain" ["txt"]
   ]
 
-isAuthenticated :: Request -> Boolean
-isAuthenticated { headers } =
+isAuthenticated :: String -> Request -> Boolean
+isAuthenticated auth { headers } =
   isJust
     (find
       (\(Tuple name value) ->
         name == "authorization"
-        && value == "Basic dXNlcjE6cGFzc3dvcmQx") -- user1:password1
+        && value == "Basic " <> auth)
       headers)
 
 onRequest
   :: forall e
-  . Context
+  . String
+  -> Context
   -> Request
   -> Aff
     (Server.Effect (Static.Effect (console :: CONSOLE, ref :: REF | e)))
     Response
-onRequest context request@{ headers, method, pathname }
-  | isAuthenticated request = do
+onRequest auth context request@{ headers, method, pathname }
+  | isAuthenticated auth request = do
     case parsePath' pathname of
       Left location ->
         pure $ response302 location
@@ -126,6 +135,8 @@ main = launchAff_ do
       }
       config.spreadsheetId
   context <- liftEff $ newRef { config, db }
+  let { basicAuthUserName, basicAuthPassword } = config
+  auth <- liftEff $ base64encode $ basicAuthUserName <> ":" <> basicAuthPassword
   port <- pure $ fromMaybe 3000 config.port
   hostname <- pure $ fromMaybe "0.0.0.0" config.hostname
   let serverOptions = { hostname, port }
@@ -133,4 +144,4 @@ main = launchAff_ do
     Server.run
       serverOptions
       (onListen { hostname, port })
-      (onRequest context)
+      (onRequest auth context)
