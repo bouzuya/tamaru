@@ -22,7 +22,9 @@ import Prelude (bind, pure, ($), (+), (<$>), (>>=))
 import Server.Sheets as Sheets
 
 type Config =
-  { googleApiClientEmail :: String
+  { basicAuthUserName :: String
+  , basicAuthPassword :: String
+  , googleApiClientEmail :: String
   , googleApiPrivateKey :: String
   , hostname :: Maybe String
   , port :: Maybe Int

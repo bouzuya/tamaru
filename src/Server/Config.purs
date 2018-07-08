@@ -26,6 +26,8 @@ toInt = maybe Nothing Int.fromString
 
 loadConfig :: forall e. Eff (Effect e) (Maybe Config)
 loadConfig = runMaybeT do
+  basicAuthUserName <- MaybeT $ loadString "TAMARU_BASIC_AUTH_USER_NAME"
+  basicAuthPassword <- MaybeT $ loadString "TAMARU_BASIC_AUTH_PASSWORD"
   googleApiClientEmail <- MaybeT $ loadString "TAMARU_GOOGLE_API_CLIENT_EMAIL"
   googleApiPrivateKey' <- MaybeT $ loadString "TAMARU_GOOGLE_API_PRIVATE_KEY"
   spreadsheetId <- MaybeT $ loadString "TAMARU_SPREADSHEET_ID"
@@ -33,4 +35,12 @@ loadConfig = runMaybeT do
     String.replaceAll (Pattern "\\n") (Replacement "\n") googleApiPrivateKey'
   hostname <- map Just $ MaybeT $ loadString "HOSTNAME"
   port <- map Just $ MaybeT $ loadInt "PORT"
-  pure { googleApiClientEmail, googleApiPrivateKey, hostname, port, spreadsheetId }
+  pure
+    { basicAuthUserName
+    , basicAuthPassword
+    , googleApiClientEmail
+    , googleApiPrivateKey
+    , hostname
+    , port
+    , spreadsheetId
+    }
