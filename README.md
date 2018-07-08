@@ -1,5 +1,7 @@
 # tamaru
 
+tamaru
+
 ## How to run
 
 ```
