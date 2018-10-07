@@ -22,7 +22,7 @@ import Halogen as H
 import Halogen.Component.ChildPath as CP
 import Halogen.HTML (prop)
 import Halogen.HTML as HH
-import Halogen.HTML.Properties (IProp(..))
+import Halogen.HTML.Properties (IProp)
 import Halogen.HTML.Properties as HP
 import Prelude (type (~>), Unit, Void, absurd, const, id, map, pure, unit, ($))
 
@@ -39,6 +39,9 @@ type Effect e = (ClientRoot.Effect (dom :: DOM | e))
 content :: forall r i. String -> IProp (content :: String | r) i
 content = prop (PropName "content")
 
+lang :: forall r i. String -> IProp (lang :: String | r) i
+lang = prop (PropName "lang")
+
 serverRoot :: forall e. H.Component HH.HTML Query Input Output (Aff (Effect e))
 serverRoot =
   H.parentComponent
@@ -53,7 +56,9 @@ serverRoot =
 
   render :: State -> H.ParentHTML Query ChildQuery ChildSlot (Aff (Effect e))
   render state =
-    HH.html []
+    HH.html
+    [ lang "ja"
+    ]
     [ HH.head []
       [ HH.meta
         [ HP.name "charset"
