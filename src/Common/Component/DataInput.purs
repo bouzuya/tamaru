@@ -8,19 +8,18 @@ module Common.Component.DataInput
 import Control.Monad.Aff (Aff)
 import DOM (DOM)
 import DOM.Event.Event (Event, preventDefault)
-import Data.Maybe (Maybe(..))
 import Halogen (ClassName(..), liftEff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Prelude (type (~>), Unit, bind, const, pure)
+import Prelude (type (~>), bind, const, pure)
 
 type State = { output :: String, value :: String } -- output for debug
 data Query a
   = Change String a
   | Submit Event a
-type Input = Unit
+type Input = String
 data Output
   = DataAdded String
 
@@ -30,7 +29,7 @@ dataInput =
     { initialState: (const { output: "", value: "" })
     , render
     , eval
-    , receiver: const Nothing
+    , receiver: HE.input Change
     }
   where
   eval :: Query ~> H.ComponentDSL State Query Output (Aff (dom :: DOM | e))
