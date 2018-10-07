@@ -56,6 +56,10 @@ serverRoot =
     HH.html []
     [ HH.head []
       [ HH.meta
+        [ HP.name "charset"
+        , content "UTF-8"
+        ]
+      , HH.meta
         [ HP.name "viewport"
         , content "width=device-width,initial-scale=1"
         ]
