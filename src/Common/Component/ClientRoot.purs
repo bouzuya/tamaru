@@ -19,20 +19,23 @@ import Control.Monad.Eff.Now (NOW, now)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import DOM (DOM)
 import Data.Array as Array
+import Data.DateTime (adjust)
 import Data.Either (either)
 import Data.Either.Nested (Either3)
 import Data.Formatter.DateTime as DateTimeFormatter
 import Data.Functor.Coproduct.Nested (Coproduct3)
-import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Maybe (Maybe(..), fromJust, fromMaybe, maybe)
 import Data.String.Regex as Regex
 import Data.String.Regex.Flags (noFlags)
+import Data.Time.Duration (Hours(..))
 import Halogen (ClassName(..), lift, liftEff)
 import Halogen as H
 import Halogen.Component.ChildPath as CP
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Prelude (type (~>), Unit, Void, append, bind, const, map, otherwise, pure, unit, ($), (==))
+import Partial.Unsafe (unsafePartial)
+import Prelude (type (~>), Unit, Void, append, bind, const, map, negate, otherwise, pure, unit, ($), (==))
 
 type ChildQuery = Coproduct3 GroupList.Query DataInput.Query DataList.Query
 type ChildSlot = Either3 Unit Unit Unit
@@ -53,7 +56,10 @@ type Effect e = Request.Effect (dom :: DOM, now :: NOW | e)
 today :: forall e. Eff (now :: NOW | e) String
 today
   = map (DateTimeFormatter.format calendarDateExtendedFormatter)
+  $ map inJST
   $ map toDateTime now
+  where
+  inJST dt = unsafePartial (fromJust (adjust (Hours (negate 9.0)) dt))
 
 update :: forall a. (a -> Boolean) -> a -> Array a -> Maybe (Array a)
 update f x xs = do
