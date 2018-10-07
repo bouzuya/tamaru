@@ -17,10 +17,12 @@ import Data.Functor.Coproduct.Nested (Coproduct1)
 import Data.Maybe (Maybe(..))
 import Data.StrMap as StrMap
 import Data.Tuple (Tuple(..))
-import Halogen (AttrName(..), ClassName(..))
+import Halogen (AttrName(..), ClassName(..), PropName(..))
 import Halogen as H
 import Halogen.Component.ChildPath as CP
+import Halogen.HTML (prop)
 import Halogen.HTML as HH
+import Halogen.HTML.Properties (IProp(..))
 import Halogen.HTML.Properties as HP
 import Prelude (type (~>), Unit, Void, absurd, const, id, map, pure, unit, ($))
 
@@ -33,6 +35,9 @@ data Query a
 type Input = { groupList :: Array Group } -- input value
 type Output = Void -- output message
 type Effect e = (ClientRoot.Effect (dom :: DOM | e))
+
+content :: forall r i. String -> IProp (content :: String | r) i
+content = prop (PropName "content")
 
 serverRoot :: forall e. H.Component HH.HTML Query Input Output (Aff (Effect e))
 serverRoot =
@@ -50,7 +55,11 @@ serverRoot =
   render state =
     HH.html []
     [ HH.head []
-      [ HH.title []
+      [ HH.meta
+        [ HP.name "viewport"
+        , content "width=device-width,initial-scale=1"
+        ]
+      , HH.title []
         [ HH.text "tamaru" ]
       ]
     , HH.body []
