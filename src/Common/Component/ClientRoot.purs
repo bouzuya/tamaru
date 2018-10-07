@@ -4,6 +4,7 @@ module Common.Component.ClientRoot
   , Output
   , Query
   , clientRoot
+  , today
   ) where
 
 import Bouzuya.DateTime.Instant (toDateTime)
@@ -56,10 +57,10 @@ type Effect e = Request.Effect (dom :: DOM, now :: NOW | e)
 today :: forall e. Eff (now :: NOW | e) String
 today
   = map (DateTimeFormatter.format calendarDateExtendedFormatter)
-  $ map inJST
+  $ map utcToJst
   $ map toDateTime now
   where
-  inJST dt = unsafePartial (fromJust (adjust (Hours (negate 9.0)) dt))
+  utcToJst dt = unsafePartial (fromJust (adjust (Hours 9.0) dt))
 
 update :: forall a. (a -> Boolean) -> a -> Array a -> Maybe (Array a)
 update f x xs = do
