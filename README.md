@@ -18,3 +18,15 @@ $ curl http://localhost:8080/
   - https://developers.google.com/apis-explorer/#p/sheets/v4/
 - Halogen 3.1.3
 - PureScript v0.11.7
+
+## License
+
+[MIT](LICENSE)
+
+## Author
+
+[bouzuya][user] &lt;[m@bouzuya.net][email]&gt; ([https://bouzuya.net/][url])
+
+[user]: https://github.com/bouzuya
+[email]: mailto:m@bouzuya.net
+[url]: https://bouzuya.net/
