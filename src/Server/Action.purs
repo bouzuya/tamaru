@@ -14,7 +14,7 @@ import Control.Monad.Aff (Aff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Ref (REF)
 import Data.Argonaut (decodeJson, jsonParser)
-import Data.Either (either)
+import Data.Either (either, hush)
 import Data.Maybe (Maybe(..))
 import Data.StrMap as StrMap
 import Prelude (class Show, bind, const, pure, ($), (<>), (=<<))
@@ -75,7 +75,7 @@ handleAction context (GetGroupDataList groupId) _ = do
       liftEff $ response200 "application/json" view
 handleAction context (UpdateGroupData groupId) { body } = do
   paramsMaybe <- pure do
-    m <- either (const Nothing) Just $ decodeJson =<< jsonParser body
+    m <- hush (decodeJson =<< jsonParser body)
     id <- StrMap.lookup "id" m
     value <- StrMap.lookup "value" m
     pure { id, value }

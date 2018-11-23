@@ -13,7 +13,7 @@ import DOM.Node.Element (getAttribute)
 import DOM.Node.Node (firstChild, removeChild)
 import DOM.Node.ParentNode (QuerySelector(..))
 import Data.Argonaut (Json, decodeJson, jsonParser, (.?))
-import Data.Either (Either, either)
+import Data.Either (Either, either, hush)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Traversable (traverse)
 import Data.Unit (Unit)
@@ -42,7 +42,7 @@ loadInitialState = do
   pure $ fromString initialStateString
   where
     fromString :: String -> Maybe { groupList :: Array Group }
-    fromString s = either (const Nothing) Just do
+    fromString s = hush do
       json <- jsonParser s
       o <- decodeJson json
       a' <- o .? "groupList"
