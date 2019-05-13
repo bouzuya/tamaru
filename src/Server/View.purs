@@ -12,7 +12,7 @@ import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=))
 import Data.ArrayBuffer.Types (Uint8Array)
 import Data.Function (($))
 import Data.Functor ((<$>))
-import Data.StrMap as StrMap
+import Foreign.Object as Object
 import Prelude (pure, show)
 import Server.Uint8Array as Uint8Array
 
@@ -32,7 +32,7 @@ instance encodeJsonView :: EncodeJson View where
     encodeJson $ DataView <$> xs
   encodeJson (DataView x) =
     encodeJson $
-      StrMap.fromFoldable
+      Object.fromFoldable
         [ "id" := x.id
         , "value" := x.value
         ]
@@ -40,13 +40,13 @@ instance encodeJsonView :: EncodeJson View where
     encodeJson $ GroupView <$> xs
   encodeJson (GroupView x) =
     encodeJson $
-      StrMap.fromFoldable
+      Object.fromFoldable
         [ "id" := x.id
         ]
   encodeJson (IndexView s) = encodeJson s
   encodeJson (RequestView r) =
     encodeJson $
-      StrMap.fromFoldable
+      Object.fromFoldable
         [ "method" := show r.method
         , "pathname" := r.pathname
         , "query" := encodeJson r.searchParams

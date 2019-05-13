@@ -16,7 +16,7 @@ import Effect.Ref (REF)
 import Data.Argonaut (decodeJson, jsonParser)
 import Data.Either (either, hush)
 import Data.Maybe (Maybe(..))
-import Data.StrMap as StrMap
+import Foreign.Object as Object
 import Prelude (class Show, bind, const, pure, ($), (<>), (=<<))
 import Server.DB (Context, addData, findDataAllByGroupId, findDataByGroupIdAndDataId, findGroupAll, findGroupById)
 import Server.Response (response200, response400, response404, response500)
@@ -76,8 +76,8 @@ handleAction context (GetGroupDataList groupId) _ = do
 handleAction context (UpdateGroupData groupId) { body } = do
   paramsMaybe <- pure do
     m <- hush (decodeJson =<< jsonParser body)
-    id <- StrMap.lookup "id" m
-    value <- StrMap.lookup "value" m
+    id <- Object.lookup "id" m
+    value <- Object.lookup "value" m
     pure { id, value }
   case paramsMaybe of
     Nothing ->

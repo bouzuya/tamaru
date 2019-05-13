@@ -21,7 +21,7 @@ import Data.Array as Array
 import Data.Foldable as Foldable
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Nullable as Nullable
-import Data.StrMap as StrMap
+import Foreign.Object as Object
 import Data.String (Pattern(..))
 import Data.String as String
 import Data.Tuple (Tuple(..))
@@ -124,7 +124,7 @@ readRequest request = do
   body <- readBody request
   pure $
     { body
-    , headers: StrMap.foldMap (\k v -> [Tuple k v]) headers
+    , headers: Object.foldMap (\k v -> [Tuple k v]) headers
     , method
     , pathname
     , searchParams

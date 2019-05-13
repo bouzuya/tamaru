@@ -15,7 +15,7 @@ import Data.Argonaut as Json
 import Data.Either.Nested (Either1)
 import Data.Functor.Coproduct.Nested (Coproduct1)
 import Data.Maybe (Maybe(..))
-import Data.StrMap as StrMap
+import Foreign.Object as Object
 import Data.Tuple (Tuple(..))
 import Halogen (AttrName(..), ClassName(..), PropName(..))
 import Halogen as H
@@ -93,19 +93,19 @@ serverRoot =
 
   toString :: State -> String
   toString state = Json.stringify $ encodeJson $
-    StrMap.fromFoldable
+    Object.fromFoldable
     [ Tuple "groupList" (encodeJson (map encodeJsonGroup state.groupList))
     ]
     where
       encodeJsonGroup :: Group -> Json
       encodeJsonGroup group = encodeJson $
-        StrMap.fromFoldable
+        Object.fromFoldable
         [ Tuple "id" (encodeJson group.id)
         , Tuple "data" (encodeJson (map encodeJsonData group.data))
         ]
       encodeJsonData :: Data -> Json
       encodeJsonData d = encodeJson $
-        StrMap.fromFoldable
+        Object.fromFoldable
         [ Tuple "id" (encodeJson d.id)
         , Tuple "value" (encodeJson d.value)
         ]
