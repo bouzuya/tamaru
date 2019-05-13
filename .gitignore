@@ -1,12 +1,11 @@
-*.log
+/*.log
+/.cache/
 /.env*
-/.psa*
 /.psc*
-/.psc-package/
-/.pulp-cache/
-/.purs*
-/bower_components/
+/.spago/
+/client.js
 /generated-docs/
 /node_modules/
 /output/
 /public/
+/server.js

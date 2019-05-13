@@ -10,13 +10,12 @@
     "googleapis": "^30.0.0"
   },
   "devDependencies": {
-    "bower": "^1.8.8",
-    "mkdirp": "^0.5.1",
     "nodemon": "^1.19.0",
     "npm-run-all": "^4.1.5",
-    "pulp": "^12.4.2",
+    "parcel-bundler": "^1.12.3",
     "purescript": "^0.12.5",
-    "rimraf": "^2.6.3"
+    "rimraf": "^2.6.3",
+    "spago": "^0.7.7"
   },
   "homepage": "https://github.com/bouzuya/tamaru#readme",
   "keywords": [],
@@ -27,24 +26,23 @@
     "url": "git+https://github.com/bouzuya/tamaru.git"
   },
   "scripts": {
-    "bower:install": "bower install",
-    "bower:prune": "bower prune",
-    "build": "npm-run-all -p 'build:*'",
-    "build:client": "npm-run-all -s 'build:client:dir' 'build:client:scripts'",
-    "build:client:dir": "mkdirp public/scripts",
-    "build:client:scripts": "pulp browserify --main Client.Main --optimise --to public/scripts/index.js",
-    "build:server": "pulp build --main Server.Main",
-    "clean": "rimraf .pulp-cache output",
-    "prepare": "npm-run-all -s bower:install bower:prune clean build",
-    "pulp": "pulp",
-    "repl": "pulp repl",
-    "start": "node --eval \"require('./output/Server.Main').main();\"",
-    "test": "pulp test",
-    "watch": "npm-run-all -p 'watch:*'",
-    "watch:client": "npm-run-all -s 'watch:client:dir' 'watch:client:scripts'",
-    "watch:client:dir": "mkdirp public/scripts",
-    "watch:client:scripts": "pulp --watch browserify --main Client.Main --optimise --to public/scripts/index.js",
-    "watch:server": "pulp --watch build --main Server.Main",
+    "build": "run-p 'build:*'",
+    "build:client": "run-s 'build:client:build' 'build:client:bundle'",
+    "build:client:build": "spago bundle --main Client.Main --to client.js",
+    "build:client:bundle": "parcel build --out-dir public/scripts --out-file index.js client.js",
+    "build:server": "spago bundle --main Server.Main --to server.js",
+    "clean": "rimraf .spago output",
+    "prepare": "run-s clean build",
+    "purs": "purs",
+    "repl": "spago repl",
+    "spago": "spago",
+    "start": "node server.js",
+    "test": "spago test",
+    "watch": "run-p 'watch:*'",
+    "watch:client": "run-p 'watch:client:build' 'watch:client:bundle'",
+    "watch:client:build": "npm run build:client:build -- --watch",
+    "watch:client:bundle": "parcel watch --out-dir public/scripts --out-file index.js client.js",
+    "watch:server": "npm run build:server -- --watch",
     "watch:start": "nodemon --delay 2 --watch output --exec 'npm start'"
   }
 }
