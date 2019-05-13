@@ -77,7 +77,7 @@ setStatusCode response (StatusCode code message) = do
 readBody
   :: forall e
   . HTTP.Request
-  -> Aff (Effect e) String
+  -> Aff String
 readBody request = do
   let readable = HTTP.requestAsStream request
   bv <- AVar.makeEmptyVar
@@ -98,7 +98,7 @@ readBody request = do
 readRequest
   :: forall e
   . HTTP.Request
-  -> Aff (Effect e) Request
+  -> Aff Request
 readRequest request = do
   let
     headers = HTTP.requestHeaders request
@@ -143,7 +143,7 @@ writeResponse response { body, headers, status } = do
 
 handleRequest
   :: forall e
-  . (Request -> Aff (Effect e) Response)
+  . (Request -> Aff Response)
   -> HTTP.Request
   -> HTTP.Response
   -> Effect Unit
@@ -156,7 +156,7 @@ run
   :: forall e
   . ServerOptions
   -> Effect Unit
-  -> (Request -> Aff (Effect e) Response)
+  -> (Request -> Aff Response)
   -> Effect Unit
 run { hostname, port } onListen onRequest = do
   server <- HTTP.createServer (handleRequest onRequest)

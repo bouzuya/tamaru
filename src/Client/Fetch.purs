@@ -33,7 +33,7 @@ foreign import textImpl
 
 foreign import statusImpl :: FetchResponse -> Int
 
-fetch' :: forall e. Options FetchOptions -> Aff (Effect e) FetchResponse
+fetch' :: forall e. Options FetchOptions -> Aff FetchResponse
 fetch' opts = do
   promise <- liftEff (fetchImpl (options (append defaults opts)))
   Promise.toAff promise
@@ -41,7 +41,7 @@ fetch' opts = do
 fetch
   :: forall e
   . Options FetchOptions
-  -> Aff (Effect e) { body :: Maybe String, status :: Int }
+  -> Aff { body :: Maybe String, status :: Int }
 fetch opts = do
   response <- fetch' opts
   let status = statusImpl response

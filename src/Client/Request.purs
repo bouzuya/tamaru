@@ -13,7 +13,7 @@ import Prelude (Unit, bind, pure, show, unit, (<>))
 
 type Effect e = Fetch.Effect e
 
-addData :: forall e. GroupId -> Data -> Aff (Effect e) Unit
+addData :: forall e. GroupId -> Data -> Aff Unit
 addData groupId d = do
   _ <- Fetch.fetch
     ( FetchOptions.defaults

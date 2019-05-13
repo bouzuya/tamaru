@@ -37,7 +37,7 @@ addData
   . Context
   -> GroupId
   -> Data
-  -> Aff (ref :: REF | e) (Maybe Data)
+  -> Aff (Maybe Data)
 addData context groupId d = do
   { config: config@
     { googleApiClientEmail
@@ -85,7 +85,7 @@ findDataAllByGroupId
   :: forall e
   . Context
   -> GroupId
-  -> Aff (ref :: REF | e) (Maybe (Array Data))
+  -> Aff (Maybe (Array Data))
 findDataAllByGroupId context groupId = do
   { db } <- liftEff $ readRef context
   pure $ findDataAllByGroupId' db groupId
@@ -98,7 +98,7 @@ findDataByGroupIdAndDataId
   . Context
   -> GroupId
   -> DataId
-  -> Aff (ref :: REF | e) (Maybe Data)
+  -> Aff (Maybe Data)
 findDataByGroupIdAndDataId context groupId dataId = do
   { db } <- liftEff $ readRef context
   pure $ findDataByGroupIdAndDataId' db groupId dataId
@@ -110,7 +110,7 @@ findDataByGroupIdAndDataId' d groupId dataId =
 findGroupAll
   :: forall e
   . Context
-  -> Aff (ref :: REF | e) (Array Group)
+  -> Aff (Array Group)
 findGroupAll context = do
   { db } <- liftEff $ readRef context
   pure $ findGroupAll' db
@@ -122,7 +122,7 @@ findGroupById
   :: forall e
   . Context
   -> GroupId
-  -> Aff (ref :: REF | e) (Maybe Group)
+  -> Aff (Maybe Group)
 findGroupById context groupId = do
   { db } <- liftEff $ readRef context
   pure $ findGroupById' db groupId

@@ -25,7 +25,7 @@ type Effect e = HA.HalogenEffects (ClientRoot.Effect e)
 
 loadInitialState
   :: forall e
-  . Aff (Effect e) (Maybe { groupList :: Array Group })
+  . Aff (Maybe { groupList :: Array Group })
 loadInitialState = do
   stateElement' <- HA.selectElement (QuerySelector "script")
   stateElement <- maybe
