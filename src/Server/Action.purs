@@ -48,7 +48,7 @@ handleAction
   . Context
   -> Action
   -> Request
-  -> Aff (Effect (View.Effect (ref :: REF | e))) Response
+  -> Aff Response
 handleAction context GetIndex _ = do
   groupList <- findGroupAll context
   view <- pure (IndexView (render serverRoot { groupList }))

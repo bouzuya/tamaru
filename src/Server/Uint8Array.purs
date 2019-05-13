@@ -7,7 +7,7 @@ module Server.Uint8Array
   , toString
   ) where
 
-import Effect (Eff)
+import Effect (Effect)
 import Data.ArrayBuffer.Types (Uint8Array)
 import Node.Buffer as Buffer
 import Node.Encoding as Encoding
@@ -19,20 +19,20 @@ type Effect e = (buffer :: Buffer.BUFFER | e)
 empty :: Uint8Array
 empty = fromArrayOctet []
 
-fromBuffer :: forall e. Buffer.Buffer -> Eff (Effect e) Uint8Array
+fromBuffer :: forall e. Buffer.Buffer -> Effect Uint8Array
 fromBuffer b = do
   a' <- Buffer.toArray b
   pure (fromArrayOctet a')
 
-fromString :: forall e. String -> Eff (Effect e) Uint8Array
+fromString :: forall e. String -> Effect Uint8Array
 fromString s = do
   b <- Buffer.fromString s Encoding.UTF8
   fromBuffer b
 
-toBuffer :: forall e. Uint8Array -> Eff (Effect e) Buffer.Buffer
+toBuffer :: forall e. Uint8Array -> Effect Buffer.Buffer
 toBuffer a = Buffer.fromArray (toArrayOctet a)
 
-toString :: forall e. Uint8Array -> Eff (Effect e) String
+toString :: forall e. Uint8Array -> Effect String
 toString a = do
   b <- toBuffer a
   Buffer.toString Encoding.UTF8 b

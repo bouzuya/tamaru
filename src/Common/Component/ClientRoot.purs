@@ -15,7 +15,7 @@ import Common.Component.GroupList as GroupList
 import Common.DateTimeFormatter (calendarDateExtendedFormatter)
 import Common.Model (Group)
 import Control.Monad.Aff (Aff)
-import Effect (Eff)
+import Effect (Effect)
 import Effect.Now (NOW, now)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import DOM (DOM)
@@ -54,7 +54,7 @@ type Input = { groupList :: Array Group } -- input value
 type Output = Void -- output message
 type Effect e = Request.Effect (dom :: DOM, now :: NOW | e)
 
-today :: forall e. Eff (now :: NOW | e) String
+today :: forall e. Effect String
 today
   = map (DateTimeFormatter.format calendarDateExtendedFormatter)
   $ map utcToJst

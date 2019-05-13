@@ -4,7 +4,7 @@ import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.Server as Server
 import Control.Monad.Aff (Aff, launchAff_)
-import Effect (Eff)
+import Effect (Effect)
 import Effect.Class (liftEff)
 import Effect.Console (CONSOLE, log)
 import Effect.Exception (EXCEPTION, throw)
@@ -47,7 +47,7 @@ type MimeType = String -- "text/html"
 
 type MimeTypeRecord = Tuple MimeType (Array ExtensionWithoutPeriod)
 
-base64encode :: forall e. String -> Eff (buffer :: BUFFER | e) String
+base64encode :: forall e. String -> Effect String
 base64encode s = do
   b <- Buffer.fromString s Encoding.UTF8
   Buffer.toString Encoding.Base64 b
@@ -118,13 +118,13 @@ onRequest auth context request@{ headers, method, pathname }
 onListen
   :: forall e
   . { hostname :: String, port :: Int }
-  -> Eff (console :: CONSOLE | e) Unit
+  -> Effect Unit
 onListen { hostname, port } = do
   _ <- log "listening..."
   _ <- log $ "http://" <> hostname <> ":" <> show port
   log ""
 
-main :: forall e. Eff (Effect e) Unit
+main :: forall e. Effect Unit
 main = launchAff_ do
   configMaybe <- liftEff Config.loadConfig
   config <- liftEff $ maybe (throw "INVALID ENV") pure configMaybe

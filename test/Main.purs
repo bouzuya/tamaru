@@ -4,7 +4,7 @@ import Bouzuya.Halogen.StringRenderer (render)
 import Common.Component.DataList (dataList)
 import Common.Component.GroupList (groupList)
 import Common.Component.ServerRoot (serverRoot)
-import Effect (Eff)
+import Effect (Effect)
 import Effect.AVar (AVAR)
 import Effect.Console (CONSOLE)
 import Effect.Exception (EXCEPTION)
@@ -21,7 +21,7 @@ import Test.Unit.Main (runTest)
 
 main
   :: forall e
-  . Eff
+  . Effect
     ( avar :: AVAR
     , console :: CONSOLE
     , dom :: DOM

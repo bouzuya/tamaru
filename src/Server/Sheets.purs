@@ -8,7 +8,7 @@ module Server.Sheets
 import Common.Model (Data, GroupId, Group)
 import Control.Bind (bind, pure, (<$>))
 import Control.Monad.Aff (Aff)
-import Effect (Eff)
+import Effect (Effect)
 import Effect.Class (liftEff)
 import Control.Promise (Promise)
 import Control.Promise as Promise
@@ -36,13 +36,13 @@ foreign import getRowsImpl
   -> PrivateKey
   -> SpreadsheetId
   -> Range
-  -> Eff e (Promise (Array Row))
+  -> Effect e (Promise (Array Row))
 foreign import getSheetTitlesImpl
   :: forall e
   . ClientEmail
   -> PrivateKey
   -> SpreadsheetId
-  -> Eff e (Promise (Array String))
+  -> Effect e (Promise (Array String))
 foreign import setRowsImpl
   :: forall e
   . ClientEmail
@@ -50,7 +50,7 @@ foreign import setRowsImpl
   -> SpreadsheetId
   -> Range
   -> Array Row
-  -> Eff e (Promise Unit)
+  -> Effect e (Promise Unit)
 
 getDataList
   :: forall e

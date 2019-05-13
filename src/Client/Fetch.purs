@@ -6,7 +6,7 @@ module Client.Fetch
 
 import Client.Fetch.Options (FetchOptions, defaults)
 import Control.Monad.Aff (Aff)
-import Effect (Eff, kind Effect)
+import Effect (Effect, kind Effect)
 import Effect.Class (liftEff)
 import Control.Promise (Promise)
 import Control.Promise as Promise
@@ -24,12 +24,12 @@ data FetchResponse
 foreign import fetchImpl
   :: forall e
   . Foreign
-  -> Eff (Effect e) (Promise FetchResponse)
+  -> Effect (Promise FetchResponse)
 
 foreign import textImpl
   :: forall e
   . FetchResponse
-  -> Eff (Effect e) (Promise String)
+  -> Effect (Promise String)
 
 foreign import statusImpl :: FetchResponse -> Int
 

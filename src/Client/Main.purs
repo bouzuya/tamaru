@@ -4,7 +4,7 @@ import Common.Component.ClientRoot as ClientRoot
 import Common.Model (Group, Data)
 import Control.Bind (bind, pure)
 import Control.Monad.Aff (Aff)
-import Effect (Eff)
+import Effect (Effect)
 import Effect.Class (liftEff)
 import Effect.Exception (error)
 import Control.Monad.Error.Class (throwError)
@@ -63,7 +63,7 @@ loadInitialState = do
           value <- o .? "value"
           pure { id, value }
 
-main :: Eff (Effect ()) Unit
+main :: Effect Unit
 main = HA.runHalogenAff do
   HA.awaitLoad
   body' <- HA.selectElement (QuerySelector ".body")

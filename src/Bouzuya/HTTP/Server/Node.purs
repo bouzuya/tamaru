@@ -12,7 +12,7 @@ import Control.Monad.Aff (Aff, liftEff')
 import Control.Monad.Aff as Aff
 import Control.Monad.Aff.AVar (AVAR)
 import Control.Monad.Aff.AVar as AVar
-import Effect (Eff)
+import Effect (Effect)
 import Effect.Class (liftEff)
 import Effect.Exception (EXCEPTION)
 import Effect.Ref (REF)
@@ -52,24 +52,24 @@ type ServerOptions =
   }
 
 setBody
-  :: forall e. HTTP.Response -> Body -> Eff (http :: HTTP.HTTP | e) Unit
+  :: forall e. HTTP.Response -> Body -> Effect Unit
 setBody response body = do
   let writable = HTTP.responseAsStream response
   _ <- Stream.write writable body $ pure unit
   Stream.end writable $ pure unit
 
 setHeader
-  :: forall e. HTTP.Response -> Header -> Eff (http :: HTTP.HTTP | e) Unit
+  :: forall e. HTTP.Response -> Header -> Effect Unit
 setHeader response (Tuple name value) =
   HTTP.setHeader response name value
 
 setHeaders
-  :: forall e. HTTP.Response -> Array Header -> Eff (http :: HTTP.HTTP | e) Unit
+  :: forall e. HTTP.Response -> Array Header -> Effect Unit
 setHeaders response headers =
   Foldable.for_ headers (setHeader response)
 
 setStatusCode
-  :: forall e. HTTP.Response -> StatusCode -> Eff (http :: HTTP.HTTP | e) Unit
+  :: forall e. HTTP.Response -> StatusCode -> Effect Unit
 setStatusCode response (StatusCode code message) = do
   _ <- HTTP.setStatusCode response code
   HTTP.setStatusMessage response message
@@ -134,7 +134,7 @@ writeResponse
   :: forall e
   . HTTP.Response
   -> Response
-  -> Eff (Uint8Array.Effect (http :: HTTP.HTTP | e)) Unit
+  -> Effect Unit
 writeResponse response { body, headers, status } = do
   _ <- setStatusCode response status
   _ <- setHeaders response headers
@@ -146,7 +146,7 @@ handleRequest
   . (Request -> Aff (Effect e) Response)
   -> HTTP.Request
   -> HTTP.Response
-  -> Eff (Effect e) Unit
+  -> Effect Unit
 handleRequest onRequest request response = Aff.launchAff_ do
   req <- readRequest request
   res <- onRequest req
@@ -155,9 +155,9 @@ handleRequest onRequest request response = Aff.launchAff_ do
 run
   :: forall e
   . ServerOptions
-  -> Eff (Effect e) Unit
+  -> Effect Unit
   -> (Request -> Aff (Effect e) Response)
-  -> Eff (Effect e) Unit
+  -> Effect Unit
 run { hostname, port } onListen onRequest = do
   server <- HTTP.createServer (handleRequest onRequest)
   let

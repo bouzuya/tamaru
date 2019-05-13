@@ -3,7 +3,7 @@ module Server.Config
   , loadConfig
   ) where
 
-import Effect (Eff, kind Effect)
+import Effect (Effect, kind Effect)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import Data.Int as Int
 import Data.Maybe (Maybe(..), maybe)
@@ -15,16 +15,16 @@ import Server.DB (Config)
 
 type Effect e = (process :: PROCESS | e)
 
-loadInt :: forall e. String -> Eff (Effect e) (Maybe Int)
+loadInt :: forall e. String -> Effect (Maybe Int)
 loadInt key = map toInt (loadString key)
 
-loadString :: forall e. String -> Eff (Effect e) (Maybe String)
+loadString :: forall e. String -> Effect (Maybe String)
 loadString key = lookupEnv key
 
 toInt :: Maybe String -> Maybe Int
 toInt = maybe Nothing Int.fromString
 
-loadConfig :: forall e. Eff (Effect e) (Maybe Config)
+loadConfig :: forall e. Effect (Maybe Config)
 loadConfig = runMaybeT do
   basicAuthUserName <- MaybeT $ loadString "TAMARU_BASIC_AUTH_USER_NAME"
   basicAuthPassword <- MaybeT $ loadString "TAMARU_BASIC_AUTH_PASSWORD"

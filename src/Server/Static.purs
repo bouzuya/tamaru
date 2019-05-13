@@ -3,7 +3,7 @@ module Server.Static
   , staticRoute
   ) where
 
-import Effect (Eff)
+import Effect (Effect)
 import Effect.Exception (EXCEPTION)
 import Control.Monad.Maybe.Trans (MaybeT(..), lift, runMaybeT)
 import Data.ArrayBuffer.Types (Uint8Array)
@@ -28,7 +28,7 @@ staticRoute
   :: forall e
   . String
   -> String
-  -> Eff
+  -> Effect
     (Effect e)
     (Maybe
       { binary :: Uint8Array
