@@ -3,12 +3,13 @@ module Server.Path
   , parsePath'
   ) where
 
+import Prelude
+
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (intercalate)
 import Data.String (Pattern(..))
 import Data.String as String
-import Prelude (not, (<<<), (<>), (==))
 
 type Path = String
 type NormalizedPath = String

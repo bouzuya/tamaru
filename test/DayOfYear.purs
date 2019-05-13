@@ -1,15 +1,16 @@
 module Test.DayOfYear (tests) where
 
+import Prelude
+
 import Bouzuya.DateTime (Month(..), canonicalDate)
 import Bouzuya.DateTime.Component.DayOfYear (canonicalDateFromDayOfYear, dayOfYear, exactDateFromDayOfYear, lastDayOfYear)
 import Data.Enum (toEnum)
 import Data.Maybe (Maybe(..), fromJust)
 import Partial.Unsafe (unsafePartial)
-import Prelude (discard)
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
 
-tests :: forall e. TestSuite e
+tests :: TestSuite
 tests = suite "Bouzuya.DateTime.Component.DayOfYear" do
   let
     year2018 = (unsafePartial (fromJust (toEnum 2018)))

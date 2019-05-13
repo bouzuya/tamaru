@@ -5,6 +5,8 @@ module Common.Component.GroupList
   , groupList
   ) where
 
+import Prelude
+
 import Common.Model (Group, GroupId)
 import Data.Foldable (find)
 import Data.Maybe (Maybe(..))
@@ -13,7 +15,6 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Prelude (type (~>), bind, const, discard, eq, map, pure)
 
 type State = { groupList :: Array Group, selected :: Maybe GroupId }
 data Query a
@@ -37,8 +38,8 @@ groupList =
     case find (\({ id }) -> eq id value) s.groupList of
       Nothing -> pure next
       Just group -> do
-        H.modify (_ { selected = Just group.id })
-        H.raise (Selected group.id)
+        _ <- H.modify (_ { selected = Just group.id })
+        _ <- H.raise (Selected group.id)
         pure next
 
   render :: State -> H.ComponentHTML Query

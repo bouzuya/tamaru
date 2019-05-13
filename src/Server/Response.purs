@@ -7,14 +7,15 @@ module Server.Response
   , response500
   ) where
 
+import Prelude
+
 import Bouzuya.HTTP.Header (Header)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.StatusCode (status200, status302, status400, status401, status404, status500)
 import Effect (Effect)
 import Data.Tuple (Tuple(..))
-import Prelude (bind, pure)
 import Server.Uint8Array as Uint8Array
-import Server.View (Effect, View, toUint8Array)
+import Server.View (View, toUint8Array)
 
 -- Header helpers
 
@@ -26,7 +27,7 @@ location = Tuple "Location"
 
 -- Response helpers
 
-response200 :: forall e. String -> View -> Effect Response
+response200 :: String -> View -> Effect Response
 response200 viewType view = do
   body <- toUint8Array view
   pure

@@ -1,8 +1,9 @@
 module Server.View
-  ( Effect
-  , View(..)
+  ( View(..)
   , toUint8Array
   ) where
+
+import Prelude
 
 import Bouzuya.HTTP.Request (Request)
 import Common.Model (Group, Data)
@@ -10,13 +11,8 @@ import Effect (Effect)
 import Data.Argonaut as Json
 import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=))
 import Data.ArrayBuffer.Types (Uint8Array)
-import Data.Function (($))
-import Data.Functor ((<$>))
 import Foreign.Object as Object
-import Prelude (pure, show)
 import Server.Uint8Array as Uint8Array
-
-type Effect e = Uint8Array.Effect e
 
 data View
   = DataListView (Array Data)
@@ -54,7 +50,7 @@ instance encodeJsonView :: EncodeJson View where
         ]
   encodeJson (StaticView _) = encodeJson ""
 
-toUint8Array :: forall e. View -> Effect Uint8Array
+toUint8Array :: View -> Effect Uint8Array
 toUint8Array (IndexView s) = Uint8Array.fromString s
 toUint8Array (StaticView b) = pure b
 toUint8Array view = do

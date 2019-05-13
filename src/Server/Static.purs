@@ -1,35 +1,23 @@
 module Server.Static
-  ( Effect
-  , staticRoute
+  ( staticRoute
   ) where
 
+import Prelude
+
 import Effect (Effect)
-import Effect.Exception (EXCEPTION)
 import Control.Monad.Maybe.Trans (MaybeT(..), lift, runMaybeT)
 import Data.ArrayBuffer.Types (Uint8Array)
 import Data.Maybe (Maybe(..))
 import Data.Monoid (guard)
-import Node.Buffer (BUFFER)
-import Node.FS (FS)
 import Node.FS.Stats as Stats
 import Node.FS.Sync as FS
 import Node.Path as Path
-import Prelude (bind, otherwise, pure, ($))
 import Server.Uint8Array as Uint8Array
 
-type Effect e =
-  ( buffer :: BUFFER
-  , exception :: EXCEPTION
-  , fs :: FS
-  | e
-  )
-
 staticRoute
-  :: forall e
-  . String
+  :: String
   -> String
   -> Effect
-    (Effect e)
     (Maybe
       { binary :: Uint8Array
       , extension :: String

@@ -1,7 +1,8 @@
 module Client.Request
-  ( Effect
-  , addData
+  ( addData
   ) where
+
+import Prelude
 
 import Bouzuya.HTTP.Method as Method
 import Client.Fetch as Fetch
@@ -9,11 +10,8 @@ import Client.Fetch.Options as FetchOptions
 import Common.Model (Data, GroupId)
 import Effect.Aff (Aff)
 import Data.Options ((:=))
-import Prelude (Unit, bind, pure, show, unit, (<>))
 
-type Effect e = Fetch.Effect e
-
-addData :: forall e. GroupId -> Data -> Aff Unit
+addData :: GroupId -> Data -> Aff Unit
 addData groupId d = do
   _ <- Fetch.fetch
     ( FetchOptions.defaults

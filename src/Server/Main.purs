@@ -1,23 +1,23 @@
 module Server.Main (main) where
 
+import Prelude
+
 import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.Server as Server
 import Effect.Aff (Aff, launchAff_)
 import Effect (Effect)
-import Effect.Class (liftEff)
-import Effect.Console (CONSOLE, log)
-import Effect.Exception (EXCEPTION, throw)
-import Effect.Ref (REF, newRef)
+import Effect.Class (liftEffect)
+import Effect.Ref as Ref
+import Effect.Console as Console
+import Effect.Exception as Exception
 import Data.Either (Either(..))
 import Data.Foldable (elem, find)
 import Data.Maybe (Maybe(..), fromMaybe, isJust, maybe)
-import Data.String as String
+import Data.String.CodeUnits as CodeUnits
 import Data.Tuple (Tuple(..), fst, snd)
-import Node.Buffer (BUFFER)
 import Node.Buffer as Buffer
 import Node.Encoding as Encoding
-import Prelude (Unit, bind, map, otherwise, pure, show, ($), (&&), (<>), (==))
 import Server.Action (handleAction)
 import Server.Config as Config
 import Server.DB (Context)
@@ -28,26 +28,13 @@ import Server.Sheets (getGroupList)
 import Server.Static as Static
 import Server.View (View(..))
 
-type Effect e =
-  (Server.Effect
-    (Static.Effect
-      (Config.Effect
-        ( console :: CONSOLE
-        , exception :: EXCEPTION
-        , ref :: REF
-        | e
-        )
-      )
-    )
-  )
-
 type Extension = String -- ".html"
 type ExtensionWithoutPeriod = String -- "html"
 type MimeType = String -- "text/html"
 
 type MimeTypeRecord = Tuple MimeType (Array ExtensionWithoutPeriod)
 
-base64encode :: forall e. String -> Effect String
+base64encode :: String -> Effect String
 base64encode s = do
   b <- Buffer.fromString s Encoding.UTF8
   Buffer.toString Encoding.Base64 b
@@ -59,7 +46,7 @@ lookupMimeType extension records = do
   pure (fst found)
   where
   getExtensionWithoutPeriod :: Extension -> Maybe ExtensionWithoutPeriod
-  getExtensionWithoutPeriod e = map _.after (String.splitAt 1 e)
+  getExtensionWithoutPeriod e = pure (CodeUnits.splitAt 1 e).after
   match :: ExtensionWithoutPeriod -> MimeTypeRecord -> Boolean
   match e record = elem e (snd record)
 
@@ -82,21 +69,14 @@ isAuthenticated auth { headers } =
         && value == "Basic " <> auth)
       headers)
 
-onRequest
-  :: forall e
-  . String
-  -> Context
-  -> Request
-  -> Aff
-    (Server.Effect (Static.Effect (console :: CONSOLE, ref :: REF | e)))
-    Response
+onRequest :: String -> Context -> Request -> Aff Response
 onRequest auth context request@{ headers, method, pathname }
   | isAuthenticated auth request = do
     case parsePath' pathname of
       Left location ->
         pure $ response302 location
       Right parsedPath -> do
-        match <- liftEff $ Static.staticRoute "public" (normalizePath parsedPath)
+        match <- liftEffect $ Static.staticRoute "public" (normalizePath parsedPath)
         case match of
           Just { binary, extension } ->
             let
@@ -106,7 +86,7 @@ onRequest auth context request@{ headers, method, pathname }
                   defaultMimeType
                   (lookupMimeType extension mimeTypeRecords)
             in
-              liftEff $ response200 mimeType (StaticView binary)
+              liftEffect $ response200 mimeType (StaticView binary)
           Nothing ->
             case route method parsedPath of
               Nothing ->
@@ -115,32 +95,30 @@ onRequest auth context request@{ headers, method, pathname }
                 handleAction context action request
   | otherwise = pure response401
 
-onListen
-  :: forall e
-  . { hostname :: String, port :: Int }
-  -> Effect Unit
+onListen :: { hostname :: String, port :: Int } -> Effect Unit
 onListen { hostname, port } = do
-  _ <- log "listening..."
-  _ <- log $ "http://" <> hostname <> ":" <> show port
-  log ""
+  _ <- Console.log "listening..."
+  _ <- Console.log $ "http://" <> hostname <> ":" <> show port
+  _ <- Console.log ""
+  pure unit
 
-main :: forall e. Effect Unit
+main :: Effect Unit
 main = launchAff_ do
-  configMaybe <- liftEff Config.loadConfig
-  config <- liftEff $ maybe (throw "INVALID ENV") pure configMaybe
+  configMaybe <- liftEffect Config.loadConfig
+  config <- liftEffect $ maybe (Exception.throw "INVALID ENV") pure configMaybe
   db <-
     getGroupList
       { clientEmail: config.googleApiClientEmail
       , privateKey: config.googleApiPrivateKey
       }
       config.spreadsheetId
-  context <- liftEff $ newRef { config, db }
+  context <- liftEffect $ Ref.new { config, db }
   let { basicAuthUserName, basicAuthPassword } = config
-  auth <- liftEff $ base64encode $ basicAuthUserName <> ":" <> basicAuthPassword
+  auth <- liftEffect $ base64encode $ basicAuthUserName <> ":" <> basicAuthPassword
   port <- pure $ fromMaybe 3000 config.port
   hostname <- pure $ fromMaybe "0.0.0.0" config.hostname
   let serverOptions = { hostname, port }
-  liftEff $
+  liftEffect $
     Server.run
       serverOptions
       (onListen { hostname, port })

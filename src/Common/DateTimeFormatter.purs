@@ -18,10 +18,11 @@ module Common.DateTimeFormatter
   , toISOString
   ) where
 
+import Prelude
+
 import Data.DateTime (DateTime)
 import Data.Formatter.DateTime as DateTimeFormatter
 import Data.List as List
-import Prelude ((<>))
 
 -- NOTE: The following format is not supported
 -- - `YY`

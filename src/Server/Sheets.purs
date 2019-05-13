@@ -9,7 +9,7 @@ import Common.Model (Data, GroupId, Group)
 import Control.Bind (bind, pure, (<$>))
 import Effect.Aff (Aff)
 import Effect (Effect)
-import Effect.Class (liftEff)
+import Effect.Class (liftEffect)
 import Control.Promise (Promise)
 import Control.Promise as Promise
 import Data.Array (catMaybes)
@@ -31,38 +31,34 @@ type Range = String
 type Row = Array String
 
 foreign import getRowsImpl
-  :: forall e
-  . ClientEmail
+  :: ClientEmail
   -> PrivateKey
   -> SpreadsheetId
   -> Range
-  -> Effect e (Promise (Array Row))
+  -> Effect (Promise (Array Row))
 foreign import getSheetTitlesImpl
-  :: forall e
-  . ClientEmail
+  :: ClientEmail
   -> PrivateKey
   -> SpreadsheetId
-  -> Effect e (Promise (Array String))
+  -> Effect (Promise (Array String))
 foreign import setRowsImpl
-  :: forall e
-  . ClientEmail
+  :: ClientEmail
   -> PrivateKey
   -> SpreadsheetId
   -> Range
   -> Array Row
-  -> Effect e (Promise Unit)
+  -> Effect (Promise Unit)
 
 getDataList
-  :: forall e
-  . SheetsCredentials
+  :: SheetsCredentials
   -> SpreadsheetId
   -> GroupId
-  -> Aff e (Array Data)
+  -> Aff (Array Data)
 getDataList { clientEmail, privateKey } spreadsheetId groupId = do
   let
     range = groupId <> "!A:B"
     eff = getRowsImpl clientEmail privateKey spreadsheetId range
-  promise <- liftEff eff
+  promise <- liftEffect eff
   rows <- Promise.toAff promise
   pure $ catMaybes (toData <$> rows)
   where
@@ -70,20 +66,18 @@ getDataList { clientEmail, privateKey } spreadsheetId groupId = do
     toData _ = Nothing
 
 getGroupIdList
-  :: forall e
-  . SheetsCredentials
+  :: SheetsCredentials
   -> SpreadsheetId
-  -> Aff e (Array GroupId)
+  -> Aff (Array GroupId)
 getGroupIdList { clientEmail, privateKey } spreadsheetId = do
   let eff = getSheetTitlesImpl clientEmail privateKey spreadsheetId
-  promise <- liftEff eff
+  promise <- liftEffect eff
   Promise.toAff promise
 
 getGroupList
-  :: forall e
-  . SheetsCredentials
+  :: SheetsCredentials
   -> SpreadsheetId
-  -> Aff e (Array Group)
+  -> Aff (Array Group)
 getGroupList credentials@{ clientEmail, privateKey } spreadsheetId = do
   groupIds <- getGroupIdList credentials spreadsheetId
   sequence $ (getGroup credentials spreadsheetId) <$> groupIds
@@ -93,14 +87,13 @@ getGroupList credentials@{ clientEmail, privateKey } spreadsheetId = do
       pure { id: groupId, data: dataList }
 
 setRows
-  :: forall e
-  . SheetsCredentials
+  :: SheetsCredentials
   -> SpreadsheetId
   -> Range
   -> Array Row
-  -> Aff e Unit
+  -> Aff Unit
 setRows { clientEmail, privateKey } spreadsheetId range rows = do
   let eff = setRowsImpl clientEmail privateKey spreadsheetId range rows
-  promise <- liftEff eff
+  promise <- liftEffect eff
   _ <- Promise.toAff promise
   pure unit

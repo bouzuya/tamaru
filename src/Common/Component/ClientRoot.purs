@@ -1,11 +1,12 @@
 module Common.Component.ClientRoot
-  ( Effect
-  , Input
+  ( Input
   , Output
   , Query
   , clientRoot
   , today
   ) where
+
+import Prelude
 
 import Bouzuya.DateTime.Instant (toDateTime)
 import Client.Request as Request
@@ -16,9 +17,8 @@ import Common.DateTimeFormatter (calendarDateExtendedFormatter)
 import Common.Model (Group)
 import Effect.Aff (Aff)
 import Effect (Effect)
-import Effect.Now (NOW, now)
+import Effect.Now (now)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
-import DOM (DOM)
 import Data.Array as Array
 import Data.DateTime (adjust)
 import Data.Either (either)
@@ -29,14 +29,13 @@ import Data.Maybe (Maybe(..), fromJust, fromMaybe, maybe)
 import Data.String.Regex as Regex
 import Data.String.Regex.Flags (noFlags)
 import Data.Time.Duration (Hours(..))
-import Halogen (ClassName(..), lift, liftEff)
+import Halogen (ClassName(..), lift, liftEffect)
 import Halogen as H
 import Halogen.Component.ChildPath as CP
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Partial.Unsafe (unsafePartial)
-import Prelude (type (~>), Unit, Void, append, bind, const, map, negate, otherwise, pure, unit, ($), (==))
 
 type ChildQuery = Coproduct3 GroupList.Query DataInput.Query DataList.Query
 type ChildSlot = Either3 Unit Unit Unit
@@ -52,9 +51,8 @@ data Query a
   | Noop a
 type Input = { groupList :: Array Group } -- input value
 type Output = Void -- output message
-type Effect e = Request.Effect (dom :: DOM, now :: NOW | e)
 
-today :: forall e. Effect String
+today :: Effect String
 today
   = map (DateTimeFormatter.format calendarDateExtendedFormatter)
   $ map utcToJst
@@ -77,7 +75,7 @@ isValid value =
     (\regex -> Regex.test regex value)
     (Regex.regex "^\\d+(\\.\\d+)?$" noFlags)
 
-clientRoot :: forall e. H.Component HH.HTML Query Input Output (Aff (Effect e))
+clientRoot :: H.Component HH.HTML Query Input Output Aff
 clientRoot =
   H.parentComponent
     { initialState
@@ -86,10 +84,10 @@ clientRoot =
     , receiver: const Nothing
     }
   where
-  eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output (Aff (Effect e))
+  eval :: Query ~> H.ParentDSL State Query ChildQuery ChildSlot Output Aff
   eval (HandleDataInput (DataInput.DataAdded value) next)
     | isValid value = do
-        id <- liftEff today
+        id <- liftEffect today
         { groupList, selectedGroup } <- H.get
         case selectedGroup of
           Nothing -> pure next
@@ -118,7 +116,7 @@ clientRoot =
     , selectedGroup: Array.head groupList
     }
 
-  render :: State -> H.ParentHTML Query ChildQuery ChildSlot (Aff (Effect e))
+  render :: State -> H.ParentHTML Query ChildQuery ChildSlot Aff
   render state =
     HH.div
     [ HP.classes [ ClassName "body" ] ]

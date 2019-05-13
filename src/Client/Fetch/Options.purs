@@ -7,12 +7,13 @@ module Client.Fetch.Options
   , url
   ) where
 
+import Prelude
+
 import Bouzuya.HTTP.Method (Method)
 import Bouzuya.HTTP.Method as Method
 import Data.Functor.Contravariant (cmap)
 import Data.Options (Option, Options, defaultToOptions, opt)
 import Foreign.Object (Object)
-import Prelude (show)
 
 data FetchOptions
 

@@ -1,9 +1,10 @@
 module Bouzuya.Halogen.StringRenderer (render) where
 
+import Prelude
+
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.VDom.DOM.StringRenderer as VSR
-import Prelude (Unit)
 
 render
   :: forall f i o m

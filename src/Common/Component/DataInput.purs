@@ -5,15 +5,15 @@ module Common.Component.DataInput
   , dataInput
   ) where
 
+import Prelude
+
 import Effect.Aff (Aff)
-import DOM (DOM)
-import DOM.Event.Event (Event, preventDefault)
-import Halogen (ClassName(..), liftEff)
+import Web.Event.Event (Event, preventDefault)
+import Halogen (ClassName(..), liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Prelude (type (~>), bind, const, pure)
 
 type State = { output :: String, value :: String } -- output for debug
 data Query a
@@ -23,7 +23,7 @@ type Input = String
 data Output
   = DataAdded String
 
-dataInput :: forall e. H.Component HH.HTML Query Input Output (Aff (dom :: DOM | e))
+dataInput :: H.Component HH.HTML Query Input Output Aff
 dataInput =
   H.component
     { initialState: (const { output: "", value: "" })
@@ -32,12 +32,12 @@ dataInput =
     , receiver: HE.input Change
     }
   where
-  eval :: Query ~> H.ComponentDSL State Query Output (Aff (dom :: DOM | e))
+  eval :: Query ~> H.ComponentDSL State Query Output Aff
   eval (Change value next) = do
     _ <- H.modify (_ { value = value })
     pure next
   eval (Submit event q) = do
-    _ <- liftEff (preventDefault event)
+    _ <- liftEffect (preventDefault event)
     value <- H.gets _.value
     _ <- H.raise (DataAdded value)
     pure q

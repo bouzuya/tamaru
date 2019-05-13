@@ -9,24 +9,32 @@
   ],
   "dependencies": {
     "purescript-aff": "^5.1.1",
-    "purescript-aff-promise": "^1.0.0",
-    "purescript-argonaut": "^3.1.0",
+    "purescript-aff-promise": "^2.1.0",
+    "purescript-argonaut": "^6.0.0",
     "purescript-bouzuya-http-method": "^0.2.1",
     "purescript-bouzuya-http-status-code": "^0.1.0",
-    "purescript-console": "^3.0.0",
-    "purescript-formatters": "^3.0.2",
-    "purescript-halogen": "^3.1.3",
-    "purescript-halogen-vdom-string-renderer": "^0.2.2",
-    "purescript-node-http": "^4.2.0",
-    "purescript-node-process": "^5.0.0",
+    "purescript-effect": "^2.0.1",
+    "purescript-js-timers": "^4.0.1",
+    "purescript-node-fs": "^5.0.0",
+    "purescript-node-http": "^5.0.0",
+    "purescript-node-process": "^7.0.0",
     "purescript-prelude": "^4.1.1",
-    "purescript-effect": "^2.0.1"
+    "purescript-random": "^4.0.0",
+    "purescript-halogen": "^4.0.0",
+    "purescript-formatters": "^4.0.1"
   },
   "devDependencies": {
-    "purescript-psci-support": "^3.0.0",
-    "purescript-test-unit": "13.0.0"
+    "purescript-psci-support": "^4.0.0",
+    "purescript-test-unit": "^15.0.0"
   },
   "resolutions": {
-    "purescript-arraybuffer-types": "^2.0.0"
+    "purescript-foldable-traversable": "^4.0.0",
+    "purescript-foreign-object": "^2.0.1",
+    "purescript-maybe": "^4.0.0",
+    "purescript-newtype": "^3.0.0",
+    "purescript-prelude": "^4.0.0",
+    "purescript-profunctor-lenses": "^6.0.0",
+    "purescript-control": "^4.0.0",
+    "purescript-invariant": "^4.0.0"
   }
 }

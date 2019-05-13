@@ -8,17 +8,17 @@ module Server.DB
   , findGroupById
   ) where
 
+import Prelude
+
 import Common.Model (Data, Group, GroupId, DataId)
 import Effect.Aff (Aff)
-import Effect.Class (liftEff)
-import Effect.Ref (REF, Ref, readRef, writeRef)
+import Effect.Class (liftEffect)
+import Effect.Ref (Ref)
+import Effect.Ref as Ref
 import Data.Array as Array
-import Data.Eq ((==))
 import Data.Foldable (find)
 import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Semigroup ((<>))
-import Prelude (bind, pure, ($), (+), (<$>), (>>=))
 import Server.Sheets as Sheets
 
 type Config =
@@ -33,8 +33,7 @@ type Config =
 type Context = Ref { config :: Config,  db :: (Array Group) }
 
 addData
-  :: forall e
-  . Context
+  :: Context
   -> GroupId
   -> Data
   -> Aff (Maybe Data)
@@ -45,9 +44,9 @@ addData context groupId d = do
     , spreadsheetId
     }
   , db
-  } <- liftEff $ readRef context
+  } <- liftEffect $ Ref.read context
   db' <- pure $ addData' db groupId d
-  _ <- liftEff $ writeRef context ({ config: config, db: db' })
+  _ <- liftEffect $ Ref.write ({ config: config, db: db' }) context
   case findGroupById' db' groupId of
     Nothing -> pure Nothing
     Just group -> do
@@ -82,25 +81,23 @@ addData' db groupId d = fromMaybe db do
     db
 
 findDataAllByGroupId
-  :: forall e
-  . Context
+  :: Context
   -> GroupId
   -> Aff (Maybe (Array Data))
 findDataAllByGroupId context groupId = do
-  { db } <- liftEff $ readRef context
+  { db } <- liftEffect $ Ref.read context
   pure $ findDataAllByGroupId' db groupId
 
 findDataAllByGroupId' :: Array Group -> GroupId -> Maybe (Array Data)
 findDataAllByGroupId' d groupId = _.data <$> (findGroupById' d groupId)
 
 findDataByGroupIdAndDataId
-  :: forall e
-  . Context
+  :: Context
   -> GroupId
   -> DataId
   -> Aff (Maybe Data)
 findDataByGroupIdAndDataId context groupId dataId = do
-  { db } <- liftEff $ readRef context
+  { db } <- liftEffect $ Ref.read context
   pure $ findDataByGroupIdAndDataId' db groupId dataId
 
 findDataByGroupIdAndDataId' :: Array Group -> GroupId -> DataId -> Maybe Data
@@ -108,23 +105,21 @@ findDataByGroupIdAndDataId' d groupId dataId =
   (findDataAllByGroupId' d groupId) >>= (find (\{ id } -> id == dataId))
 
 findGroupAll
-  :: forall e
-  . Context
+  :: Context
   -> Aff (Array Group)
 findGroupAll context = do
-  { db } <- liftEff $ readRef context
+  { db } <- liftEffect $ Ref.read context
   pure $ findGroupAll' db
 
 findGroupAll' :: Array Group -> Array Group
 findGroupAll' d = d
 
 findGroupById
-  :: forall e
-  . Context
+  :: Context
   -> GroupId
   -> Aff (Maybe Group)
 findGroupById context groupId = do
-  { db } <- liftEff $ readRef context
+  { db } <- liftEffect $ Ref.read context
   pure $ findGroupById' db groupId
 
 findGroupById' :: Array Group -> GroupId -> Maybe Group

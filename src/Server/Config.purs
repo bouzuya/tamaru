@@ -1,30 +1,28 @@
 module Server.Config
-  ( Effect
-  , loadConfig
+  ( loadConfig
   ) where
 
-import Effect (Effect, kind Effect)
+import Prelude
+
+import Effect (Effect)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import Data.Int as Int
 import Data.Maybe (Maybe(..), maybe)
 import Data.String (Pattern(..), Replacement(..))
 import Data.String as String
-import Node.Process (PROCESS, lookupEnv)
-import Prelude (bind, map, pure, ($))
+import Node.Process (lookupEnv)
 import Server.DB (Config)
 
-type Effect e = (process :: PROCESS | e)
-
-loadInt :: forall e. String -> Effect (Maybe Int)
+loadInt :: String -> Effect (Maybe Int)
 loadInt key = map toInt (loadString key)
 
-loadString :: forall e. String -> Effect (Maybe String)
+loadString :: String -> Effect (Maybe String)
 loadString key = lookupEnv key
 
 toInt :: Maybe String -> Maybe Int
 toInt = maybe Nothing Int.fromString
 
-loadConfig :: forall e. Effect (Maybe Config)
+loadConfig :: Effect (Maybe Config)
 loadConfig = runMaybeT do
   basicAuthUserName <- MaybeT $ loadString "TAMARU_BASIC_AUTH_USER_NAME"
   basicAuthPassword <- MaybeT $ loadString "TAMARU_BASIC_AUTH_PASSWORD"

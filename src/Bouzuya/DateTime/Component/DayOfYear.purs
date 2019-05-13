@@ -6,6 +6,8 @@ module Bouzuya.DateTime.Component.DayOfYear
   , lastDayOfYear
   ) where
 
+import Prelude
+
 import Data.Date (Date, Day, Month(..), Year, diff, exactDate, isLeapYear, lastDayOfMonth, year)
 import Data.Enum (class BoundedEnum, class Enum, Cardinality(..), enumFromTo, fromEnum, succ, toEnum)
 import Data.Foldable (foldl)
@@ -14,7 +16,6 @@ import Data.Maybe (Maybe(..), fromJust)
 import Data.Time.Duration (Days(..))
 import Data.Tuple (Tuple(..), fst)
 import Partial.Unsafe (unsafePartial)
-import Prelude (class Bounded, class Eq, class Ord, class Show, otherwise, show, (&&), (+), (-), (<<<), (<=), (<>), (==), (>>=))
 
 newtype DayOfYear = DayOfYear Int
 

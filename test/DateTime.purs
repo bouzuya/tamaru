@@ -1,15 +1,16 @@
 module Test.DateTime (tests) where
 
+import Prelude
+
 import Bouzuya.DateTime (Date, DateTime(..), Day, DayOfYear, Hour, Millisecond, Minute, Month(..), Second, Time(..), Weekday(..), Year, exactDate)
 import Bouzuya.DateTime.Instant as Instant
 import Data.Enum (toEnum)
 import Data.Maybe (fromJust)
 import Partial.Unsafe (unsafePartial)
-import Prelude (discard, ($), (<<<))
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
 
-tests :: forall e. TestSuite e
+tests :: TestSuite
 tests = do
   let
     year2018 :: Year

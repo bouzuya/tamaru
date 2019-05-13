@@ -1,36 +1,20 @@
 module Test.Main (main) where
 
+import Prelude
+
 import Bouzuya.Halogen.StringRenderer (render)
 import Common.Component.DataList (dataList)
 import Common.Component.GroupList (groupList)
 import Common.Component.ServerRoot (serverRoot)
 import Effect (Effect)
-import Effect.AVar (AVAR)
-import Effect.Console (CONSOLE)
-import Effect.Exception (EXCEPTION)
-import Effect.Ref (REF)
-import DOM (DOM)
 import Data.Foldable (intercalate)
-import Prelude (Unit, discard)
 import Test.DayOfYear as DayOfYear
 import Test.DateTime as DateTime
 import Test.Unit (suite, test)
 import Test.Unit.Assert as Assert
-import Test.Unit.Console (TESTOUTPUT)
 import Test.Unit.Main (runTest)
 
-main
-  :: forall e
-  . Effect
-    ( avar :: AVAR
-    , console :: CONSOLE
-    , dom :: DOM
-    , exception :: EXCEPTION
-    , ref :: REF
-    , testOutput :: TESTOUTPUT
-    | e
-    )
-    Unit
+main :: Effect Unit
 main = runTest do
   DateTime.tests
   DayOfYear.tests

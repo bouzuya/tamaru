@@ -1,22 +1,19 @@
 module Bouzuya.HTTP.Server.Node
-  ( Effect
-  , run
+  ( run
   ) where
+
+import Prelude
 
 import Bouzuya.HTTP.Header (Header)
 import Bouzuya.HTTP.Method as Method
 import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.StatusCode (StatusCode(..))
-import Effect.Aff (Aff, liftEff')
+import Effect.Aff (Aff)
 import Effect.Aff as Aff
-import Effect.Aff.AVar (AVAR)
 import Effect.Aff.AVar as AVar
 import Effect (Effect)
-import Effect.Class (liftEff)
-import Effect.Exception (EXCEPTION)
-import Effect.Ref (REF)
-import DOM (DOM)
+import Effect.Class (liftEffect)
 import Data.Array as Array
 import Data.Foldable as Foldable
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
@@ -25,80 +22,58 @@ import Foreign.Object as Object
 import Data.String (Pattern(..))
 import Data.String as String
 import Data.Tuple (Tuple(..))
-import Global (decodeURIComponent)
-import Node.Buffer (BUFFER)
+import Global.Unsafe (unsafeDecodeURIComponent)
 import Node.Buffer as Buffer
 import Node.Encoding as Encoding
 import Node.HTTP as HTTP
 import Node.Stream as Stream
 import Node.URL as URL
-import Prelude (Unit, bind, map, pure, unit, ($), (<>), (>>>))
 import Server.Uint8Array as Uint8Array
 
-type Effect e =
-  Uint8Array.Effect
-  ( avar :: AVAR
-  , buffer :: BUFFER
-  , dom :: DOM
-  , exception :: EXCEPTION
-  , http :: HTTP.HTTP
-  , ref :: REF
-  | e
-  )
 type Body = Buffer.Buffer
 type ServerOptions =
   { hostname :: String
   , port :: Int
   }
 
-setBody
-  :: forall e. HTTP.Response -> Body -> Effect Unit
+setBody :: HTTP.Response -> Body -> Effect Unit
 setBody response body = do
   let writable = HTTP.responseAsStream response
   _ <- Stream.write writable body $ pure unit
   Stream.end writable $ pure unit
 
-setHeader
-  :: forall e. HTTP.Response -> Header -> Effect Unit
+setHeader :: HTTP.Response -> Header -> Effect Unit
 setHeader response (Tuple name value) =
   HTTP.setHeader response name value
 
-setHeaders
-  :: forall e. HTTP.Response -> Array Header -> Effect Unit
+setHeaders :: HTTP.Response -> Array Header -> Effect Unit
 setHeaders response headers =
   Foldable.for_ headers (setHeader response)
 
-setStatusCode
-  :: forall e. HTTP.Response -> StatusCode -> Effect Unit
+setStatusCode :: HTTP.Response -> StatusCode -> Effect Unit
 setStatusCode response (StatusCode code message) = do
   _ <- HTTP.setStatusCode response code
   HTTP.setStatusMessage response message
 
-readBody
-  :: forall e
-  . HTTP.Request
-  -> Aff String
+readBody :: HTTP.Request -> Aff String
 readBody request = do
   let readable = HTTP.requestAsStream request
-  bv <- AVar.makeEmptyVar
-  bsv <- AVar.makeVar []
+  bv <- AVar.empty
+  bsv <- AVar.new []
   -- TODO: check exception
-  _ <- liftEff' $ Stream.onData readable \b -> Aff.launchAff_ do
-    bs <- AVar.takeVar bsv
-    AVar.putVar (bs <> [b]) bsv
-  _ <- liftEff' $ Stream.onError readable \e -> Aff.launchAff_ do
-    AVar.killVar e bv
-  _ <- liftEff' $ Stream.onEnd readable $ Aff.launchAff_ do
-    bs <- AVar.takeVar bsv
-    b <- liftEff (Buffer.concat bs)
-    AVar.putVar b bv
-  b <- AVar.takeVar bv
-  liftEff (Buffer.toString Encoding.UTF8 b)
+  _ <- liftEffect $ Stream.onData readable \b -> Aff.launchAff_ do
+    bs <- AVar.take bsv
+    AVar.put (bs <> [b]) bsv
+  _ <- liftEffect $ Stream.onError readable \e -> Aff.launchAff_ do
+    AVar.kill e bv
+  _ <- liftEffect $ Stream.onEnd readable $ Aff.launchAff_ do
+    bs <- AVar.take bsv
+    b <- liftEffect (Buffer.concat bs)
+    AVar.put b bv
+  b <- AVar.take bv
+  liftEffect (Buffer.toString Encoding.UTF8 b)
 
-readRequest
-  :: forall e
-  . HTTP.Request
-  -> Aff Request
+readRequest :: HTTP.Request -> Aff Request
 readRequest request = do
   let
     headers = HTTP.requestHeaders request
@@ -113,7 +88,7 @@ readRequest request = do
     parseQueryString =
       String.split (Pattern "&")
         >>> map (String.split (Pattern "="))
-        >>> map (map decodeURIComponent)
+        >>> map (map unsafeDecodeURIComponent)
         >>> map
           (
             case _ of
@@ -130,31 +105,24 @@ readRequest request = do
     , searchParams
     }
 
-writeResponse
-  :: forall e
-  . HTTP.Response
-  -> Response
-  -> Effect Unit
+writeResponse :: HTTP.Response -> Response -> Effect Unit
 writeResponse response { body, headers, status } = do
   _ <- setStatusCode response status
   _ <- setHeaders response headers
   b <- Uint8Array.toBuffer body
   setBody response b
 
-handleRequest
-  :: forall e
-  . (Request -> Aff Response)
+handleRequest :: (Request -> Aff Response)
   -> HTTP.Request
   -> HTTP.Response
   -> Effect Unit
 handleRequest onRequest request response = Aff.launchAff_ do
   req <- readRequest request
   res <- onRequest req
-  liftEff $ writeResponse response res
+  liftEffect $ writeResponse response res
 
 run
-  :: forall e
-  . ServerOptions
+  :: ServerOptions
   -> Effect Unit
   -> (Request -> Aff Response)
   -> Effect Unit
