@@ -23,6 +23,10 @@ $ curl http://localhost:8080/
 
 [MIT](LICENSE)
 
+`src/Halogen/*` is Apache-2.0. See [slamdata/purescript-halogen-vdom-string-renderer][].
+
+[slamdata/purescript-halogen-vdom-string-renderer]: https://github.com/slamdata/purescript-halogen-vdom-string-renderer
+
 ## Author
 
 [bouzuya][user] &lt;[m@bouzuya.net][email]&gt; ([https://bouzuya.net/][url])
