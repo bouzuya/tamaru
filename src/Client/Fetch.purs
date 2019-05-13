@@ -10,7 +10,7 @@ import Effect (Effect, kind Effect)
 import Effect.Class (liftEff)
 import Control.Promise (Promise)
 import Control.Promise as Promise
-import Data.Foreign (Foreign)
+import Foreign (Foreign)
 import Data.Maybe (Maybe(..))
 import Data.Options (Options, options)
 import Prelude (append, bind, eq, pure)
