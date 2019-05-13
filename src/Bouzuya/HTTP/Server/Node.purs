@@ -12,10 +12,10 @@ import Control.Monad.Aff (Aff, liftEff')
 import Control.Monad.Aff as Aff
 import Control.Monad.Aff.AVar (AVAR)
 import Control.Monad.Aff.AVar as AVar
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Exception (EXCEPTION)
-import Control.Monad.Eff.Ref (REF)
+import Effect (Eff)
+import Effect.Class (liftEff)
+import Effect.Exception (EXCEPTION)
+import Effect.Ref (REF)
 import DOM (DOM)
 import Data.Array as Array
 import Data.Foldable as Foldable

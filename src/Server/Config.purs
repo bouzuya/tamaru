@@ -3,7 +3,7 @@ module Server.Config
   , loadConfig
   ) where
 
-import Control.Monad.Eff (Eff, kind Effect)
+import Effect (Eff, kind Effect)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import Data.Int as Int
 import Data.Maybe (Maybe(..), maybe)

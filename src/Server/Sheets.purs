@@ -8,8 +8,8 @@ module Server.Sheets
 import Common.Model (Data, GroupId, Group)
 import Control.Bind (bind, pure, (<$>))
 import Control.Monad.Aff (Aff)
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (liftEff)
+import Effect (Eff)
+import Effect.Class (liftEff)
 import Control.Promise (Promise)
 import Control.Promise as Promise
 import Data.Array (catMaybes)

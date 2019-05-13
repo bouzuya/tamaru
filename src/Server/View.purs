@@ -6,7 +6,7 @@ module Server.View
 
 import Bouzuya.HTTP.Request (Request)
 import Common.Model (Group, Data)
-import Control.Monad.Eff (Eff)
+import Effect (Eff)
 import Data.Argonaut as Json
 import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=))
 import Data.ArrayBuffer.Types (Uint8Array)

@@ -6,8 +6,8 @@ module Client.Fetch
 
 import Client.Fetch.Options (FetchOptions, defaults)
 import Control.Monad.Aff (Aff)
-import Control.Monad.Eff (Eff, kind Effect)
-import Control.Monad.Eff.Class (liftEff)
+import Effect (Eff, kind Effect)
+import Effect.Class (liftEff)
 import Control.Promise (Promise)
 import Control.Promise as Promise
 import Data.Foreign (Foreign)

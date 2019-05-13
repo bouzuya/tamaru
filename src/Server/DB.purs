@@ -10,8 +10,8 @@ module Server.DB
 
 import Common.Model (Data, Group, GroupId, DataId)
 import Control.Monad.Aff (Aff)
-import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Ref (REF, Ref, readRef, writeRef)
+import Effect.Class (liftEff)
+import Effect.Ref (REF, Ref, readRef, writeRef)
 import Data.Array as Array
 import Data.Eq ((==))
 import Data.Foldable (find)

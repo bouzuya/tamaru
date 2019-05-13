@@ -7,7 +7,7 @@ module Server.Uint8Array
   , toString
   ) where
 
-import Control.Monad.Eff (Eff)
+import Effect (Eff)
 import Data.ArrayBuffer.Types (Uint8Array)
 import Node.Buffer as Buffer
 import Node.Encoding as Encoding

@@ -3,8 +3,8 @@ module Server.Static
   , staticRoute
   ) where
 
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Exception (EXCEPTION)
+import Effect (Eff)
+import Effect.Exception (EXCEPTION)
 import Control.Monad.Maybe.Trans (MaybeT(..), lift, runMaybeT)
 import Data.ArrayBuffer.Types (Uint8Array)
 import Data.Maybe (Maybe(..))
