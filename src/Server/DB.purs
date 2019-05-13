@@ -9,7 +9,7 @@ module Server.DB
   ) where
 
 import Common.Model (Data, Group, GroupId, DataId)
-import Control.Monad.Aff (Aff)
+import Effect.Aff (Aff)
 import Effect.Class (liftEff)
 import Effect.Ref (REF, Ref, readRef, writeRef)
 import Data.Array as Array

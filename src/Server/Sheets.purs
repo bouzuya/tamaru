@@ -7,7 +7,7 @@ module Server.Sheets
 
 import Common.Model (Data, GroupId, Group)
 import Control.Bind (bind, pure, (<$>))
-import Control.Monad.Aff (Aff)
+import Effect.Aff (Aff)
 import Effect (Effect)
 import Effect.Class (liftEff)
 import Control.Promise (Promise)

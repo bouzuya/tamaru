@@ -8,7 +8,7 @@
     "output"
   ],
   "dependencies": {
-    "purescript-aff": "^4.0.0",
+    "purescript-aff": "^5.1.1",
     "purescript-aff-promise": "^1.0.0",
     "purescript-argonaut": "^3.1.0",
     "purescript-bouzuya-http-method": "^0.2.1",
@@ -19,7 +19,8 @@
     "purescript-halogen-vdom-string-renderer": "^0.2.2",
     "purescript-node-http": "^4.2.0",
     "purescript-node-process": "^5.0.0",
-    "purescript-prelude": "^3.3.0"
+    "purescript-prelude": "^4.1.1",
+    "purescript-effect": "^2.0.1"
   },
   "devDependencies": {
     "purescript-psci-support": "^3.0.0",

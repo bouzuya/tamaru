@@ -3,7 +3,7 @@ module Client.Main (main) where
 import Common.Component.ClientRoot as ClientRoot
 import Common.Model (Group, Data)
 import Control.Bind (bind, pure)
-import Control.Monad.Aff (Aff)
+import Effect.Aff (Aff)
 import Effect (Effect)
 import Effect.Class (liftEff)
 import Effect.Exception (error)

@@ -8,7 +8,7 @@ module Common.Component.ServerRoot
 
 import Common.Component.ClientRoot as ClientRoot
 import Common.Model (Group, Data)
-import Control.Monad.Aff (Aff)
+import Effect.Aff (Aff)
 import DOM (DOM)
 import Data.Argonaut (Json, encodeJson)
 import Data.Argonaut as Json

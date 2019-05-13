@@ -8,10 +8,10 @@ import Bouzuya.HTTP.Method as Method
 import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.StatusCode (StatusCode(..))
-import Control.Monad.Aff (Aff, liftEff')
-import Control.Monad.Aff as Aff
-import Control.Monad.Aff.AVar (AVAR)
-import Control.Monad.Aff.AVar as AVar
+import Effect.Aff (Aff, liftEff')
+import Effect.Aff as Aff
+import Effect.Aff.AVar (AVAR)
+import Effect.Aff.AVar as AVar
 import Effect (Effect)
 import Effect.Class (liftEff)
 import Effect.Exception (EXCEPTION)

@@ -3,7 +3,7 @@ module Server.Main (main) where
 import Bouzuya.HTTP.Request (Request)
 import Bouzuya.HTTP.Response (Response)
 import Bouzuya.HTTP.Server as Server
-import Control.Monad.Aff (Aff, launchAff_)
+import Effect.Aff (Aff, launchAff_)
 import Effect (Effect)
 import Effect.Class (liftEff)
 import Effect.Console (CONSOLE, log)

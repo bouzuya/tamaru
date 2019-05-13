@@ -14,7 +14,7 @@ import Common.Component.DataList as DataList
 import Common.Component.GroupList as GroupList
 import Common.DateTimeFormatter (calendarDateExtendedFormatter)
 import Common.Model (Group)
-import Control.Monad.Aff (Aff)
+import Effect.Aff (Aff)
 import Effect (Effect)
 import Effect.Now (NOW, now)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)

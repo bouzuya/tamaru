@@ -5,7 +5,7 @@ module Common.Component.DataInput
   , dataInput
   ) where
 
-import Control.Monad.Aff (Aff)
+import Effect.Aff (Aff)
 import DOM (DOM)
 import DOM.Event.Event (Event, preventDefault)
 import Halogen (ClassName(..), liftEff)

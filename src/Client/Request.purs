@@ -7,7 +7,7 @@ import Bouzuya.HTTP.Method as Method
 import Client.Fetch as Fetch
 import Client.Fetch.Options as FetchOptions
 import Common.Model (Data, GroupId)
-import Control.Monad.Aff (Aff)
+import Effect.Aff (Aff)
 import Data.Options ((:=))
 import Prelude (Unit, bind, pure, show, unit, (<>))
 
