@@ -28,9 +28,9 @@
   "scripts": {
     "build": "run-p 'build:*'",
     "build:client": "run-s 'build:client:build' 'build:client:bundle'",
-    "build:client:build": "spago bundle --main Client.Main --to client.js",
+    "build:client:build": "spago bundle-app --main Client.Main --to client.js",
     "build:client:bundle": "parcel build --out-dir public/scripts --out-file index.js client.js",
-    "build:server": "spago bundle --main Server.Main --to server.js",
+    "build:server": "spago bundle-app --main Server.Main --to server.js",
     "clean": "rimraf .spago output",
     "prepare": "run-s clean build",
     "purs": "purs",
