@@ -11,6 +11,10 @@ import Test.Unit.Assert as Assert
 
 tests :: TestSuite
 tests = TestUnit.suite "Server.Action" do
+  TestUnit.test "Eq Action" do
+    Assert.equal Action.GetIndex Action.GetIndex
+    Assert.assert "notEq" (notEq Action.GetIndex Action.GetGroupList)
+
   TestUnit.test "Show Action" do
     Assert.equal "GetIndex" (show Action.GetIndex)
     Assert.equal "GetGroupList" (show Action.GetGroupList)
