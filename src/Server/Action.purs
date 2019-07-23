@@ -17,6 +17,8 @@ data Action
   | UpdateGroupData GroupIdLike
   | GetGroupData GroupIdLike DataIdLike
 
+derive instance eqAction :: Eq Action
+
 instance showAction :: Show Action where
   show GetIndex = "GetIndex"
   show GetGroupList = "GetGroupList"
