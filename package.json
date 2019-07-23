@@ -7,7 +7,9 @@
     "url": "https://github.com/bouzuya/tamaru/issues"
   },
   "dependencies": {
-    "googleapis": "^39.2.0"
+    "googleapis": "^39.2.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
   },
   "devDependencies": {
     "nodemon": "^1.19.0",
