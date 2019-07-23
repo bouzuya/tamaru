@@ -8,8 +8,6 @@ import Bouzuya.HTTP.Body as Body
 import Bouzuya.HTTP.Method as Method
 import Data.Tuple as Tuple
 import Effect.Class as Class
-import Server.Action as Action
-import Server.BasicAuth (isAuthenticated)
 import Server.BasicAuth as BasicAuth
 import Test.Unit (TestSuite)
 import Test.Unit as TestUnit
