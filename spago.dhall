@@ -10,6 +10,7 @@ You can edit this file as you like.
     [ "aff-promise"
     , "argonaut"
     , "bouzuya-http-method"
+    , "bouzuya-http-server"
     , "bouzuya-http-status-code"
     , "formatters"
     , "halogen"
